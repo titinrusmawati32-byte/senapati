@@ -554,7 +554,18 @@ function adminSaveRow(sheetName, data, session) {
   if (!sheet) throw new Error("Sheet tidak ditemukan: " + sheetName);
 
   const values = sheet.getDataRange().getValues();
-  const headers = values[0].map(h => String(h).trim());
+  let headers = values[0].map(h => String(h).trim());
+
+  // Pastikan kolom fotoUrl dan kategori otomatis dibuat jika belum ada di sheet
+  if (data.fotoUrl !== undefined && !headers.includes("fotoUrl")) {
+    sheet.getRange(1, headers.length + 1).setValue("fotoUrl");
+    headers.push("fotoUrl");
+  }
+  if (data.kategori !== undefined && !headers.includes("kategori")) {
+    sheet.getRange(1, headers.length + 1).setValue("kategori");
+    headers.push("kategori");
+  }
+
   const idColIdx = headers.indexOf("id");
 
   let targetRowIdx = -1;
@@ -602,7 +613,18 @@ function adminDeleteRow(sheetName, id, session) {
   if (!sheet) throw new Error("Sheet tidak ditemukan: " + sheetName);
 
   const values = sheet.getDataRange().getValues();
-  const headers = values[0].map(h => String(h).trim());
+  let headers = values[0].map(h => String(h).trim());
+
+  // Pastikan kolom fotoUrl dan kategori otomatis dibuat jika belum ada di sheet
+  if (data.fotoUrl !== undefined && !headers.includes("fotoUrl")) {
+    sheet.getRange(1, headers.length + 1).setValue("fotoUrl");
+    headers.push("fotoUrl");
+  }
+  if (data.kategori !== undefined && !headers.includes("kategori")) {
+    sheet.getRange(1, headers.length + 1).setValue("kategori");
+    headers.push("kategori");
+  }
+
   const idColIdx = headers.indexOf("id");
 
   for (let i = 1; i < values.length; i++) {
@@ -625,7 +647,18 @@ function adminToggleRow(sheetName, id, tampil, session) {
   if (!sheet) throw new Error("Sheet tidak ditemukan: " + sheetName);
 
   const values = sheet.getDataRange().getValues();
-  const headers = values[0].map(h => String(h).trim());
+  let headers = values[0].map(h => String(h).trim());
+
+  // Pastikan kolom fotoUrl dan kategori otomatis dibuat jika belum ada di sheet
+  if (data.fotoUrl !== undefined && !headers.includes("fotoUrl")) {
+    sheet.getRange(1, headers.length + 1).setValue("fotoUrl");
+    headers.push("fotoUrl");
+  }
+  if (data.kategori !== undefined && !headers.includes("kategori")) {
+    sheet.getRange(1, headers.length + 1).setValue("kategori");
+    headers.push("kategori");
+  }
+
   const idColIdx = headers.indexOf("id");
   const tampilColIdx = headers.indexOf("tampil");
 
@@ -858,7 +891,7 @@ function setupAwal() {
     "PenggunaAdmin": ["id", "namaPengguna", "namaTampil", "peran", "hash", "aktif", "wajibGantiSandi", "dibuat"],
     "Media": ["id", "fileId", "url", "alt", "namaAsli", "diunggah", "oleh"],
     "Log": ["waktu", "pengguna", "aksi", "modul", "ringkasan"],
-    "Pengumuman": ["id", "judul", "tanggal", "isi", "tampil"],
+    "Pengumuman": ["id", "judul", "tanggal", "kategori", "isi", "fotoUrl", "tampil"],
     "Guru": ["id", "nama", "jabatan", "fotoUrl", "urutan", "tampil"],
     "Ekstrakurikuler": ["id", "nama", "deskripsi", "pembina", "jadwal", "fotoUrl", "tampil"],
     "Fasilitas": ["id", "nama", "deskripsi", "fotoUrl", "urutan", "tampil"],

@@ -680,6 +680,14 @@
     };
     if (keyMap[sheetName]) {
       const publicItems = (items || []).filter((x) => x.tampil === true || String(x.tampil).toUpperCase() === "TRUE");
+      if (sheetName === "Pengumuman") {
+        publicItems.forEach(it => {
+          if (!it.fotoUrl) {
+            const cachedP = localStorage.getItem("sdn_photo_" + it.id);
+            if (cachedP) it.fotoUrl = cachedP;
+          }
+        });
+      }
       localStorage.setItem(keyMap[sheetName], JSON.stringify(publicItems));
     }
 
@@ -1191,6 +1199,10 @@
       dataObj.foto = photoVal;
       dataObj.gambar = photoVal;
       dataObj.thumbnail = photoVal;
+
+      if (dataObj.id && photoVal) {
+        localStorage.setItem("sdn_photo_" + dataObj.id, photoVal);
+      }
     }
 
     // Status Tampil Boolean

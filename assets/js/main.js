@@ -338,6 +338,8 @@ const DEFAULT_FEATURED_PENGUMUMAN = [
     kategoriClass: "blue",
     kategoriIcon: "📢",
     fotoUrl: "assets/img/pengumuman-sumpah-pemuda.svg",
+    bannerUrl: "assets/img/pengumuman-sumpah-pemuda.svg",
+    fallbackSvg: "assets/img/pengumuman-sumpah-pemuda.svg",
     isi: "Diberitahukan kepada seluruh siswa-siswi dan orang tua/wali murid SDN Sumberejo 04, dalam rangka memperingati Hari Sumpah Pemuda pada tanggal 28 Oktober 2026, sekolah akan menyelenggarakan kegiatan dengan rincian sebagai berikut:\n\nHari, tanggal: Rabu, 28 Oktober 2026\nWaktu: Pukul 07.00 WIB – Selesai\nKegiatan: Upacara Bendera Peringatan Hari Sumpah Pemuda & Kegiatan Literasi/Kreativitas Siswa\nPakaian/Seragam: Pakaian Adat / Batik Sekolah / Seragam Pramuka\n\nDiharapkan seluruh siswa hadir tepat waktu dan mengikuti seluruh rangkaian kegiatan dengan tertib dan penuh semangat. Demikian pengumuman ini disampaikan. Atas perhatian dan kerja sama Bapak/Ibu Wali Murid, kami ucapkan terima kasih."
   },
   {
@@ -348,6 +350,8 @@ const DEFAULT_FEATURED_PENGUMUMAN = [
     kategoriClass: "green",
     kategoriIcon: "📖",
     fotoUrl: "assets/img/pengumuman-pts.svg",
+    bannerUrl: "assets/img/pengumuman-pts.svg",
+    fallbackSvg: "assets/img/pengumuman-pts.svg",
     isi: "Diberitahukan kepada seluruh siswa-siswi, bahwa pelaksanaan Penilaian Tengah Semester (PTS) akan dilaksanakan pada tanggal 2 November – 7 November 2026. Mohon semua siswa mempersiapkan diri dengan baik dan belajar secara teratur. Jadwal mata pelajaran harian dapat dilihat melalui lembar informasi yang dibagikan wali kelas masing-masing."
   },
   {
@@ -358,6 +362,8 @@ const DEFAULT_FEATURED_PENGUMUMAN = [
     kategoriClass: "purple",
     kategoriIcon: "👥",
     fotoUrl: "assets/img/pengumuman-rapat-ortu.svg",
+    bannerUrl: "assets/img/pengumuman-rapat-ortu.svg",
+    fallbackSvg: "assets/img/pengumuman-rapat-ortu.svg",
     isi: "Diberitahukan kepada seluruh orang tua/wali murid kelas 1–6 bahwa akan dilaksanakan Rapat Orang Tua/Wali Murid pada tanggal 30 Oktober 2026 pukul 08.00 WIB di ruang kelas masing-masing. Kehadiran Bapak/Ibu sangat kami harapkan guna membahas perkembangan kurikulum, pembinaan karakter, serta persiapan agenda semester berjalan."
   }
 ];
@@ -369,22 +375,22 @@ function normalizePengumumanList(rawList) {
     return DEFAULT_FEATURED_PENGUMUMAN;
   }
 
-  const processed = rawList.map((item, idx) => {
+  const mapSingleItem = (item, idx) => {
     let kategori = item.kategori || "";
-    let kategoriClass = "blue";
-    let kategoriIcon = "📢";
+    let kategoriClass = item.kategoriClass || "blue";
+    let kategoriIcon = item.kategoriIcon || "📢";
 
     const titleLower = (item.judul || "").toLowerCase();
 
     if (kategori) {
       const catLower = kategori.toLowerCase();
-      if (catLower.includes("akademik") || catLower.includes("belajar") || catLower.includes("ujian")) {
+      if (catLower.includes("akademik") || catLower.includes("belajar") || catLower.includes("ujian") || catLower.includes("pts")) {
         kategoriClass = "green";
         kategoriIcon = "📖";
-      } else if (catLower.includes("orang tua") || catLower.includes("wali")) {
+      } else if (catLower.includes("orang tua") || catLower.includes("wali") || catLower.includes("rapat")) {
         kategoriClass = "purple";
         kategoriIcon = "👥";
-      } else if (catLower.includes("kegiatan") || catLower.includes("ekskul") || catLower.includes("lomba")) {
+      } else if (catLower.includes("kegiatan") || catLower.includes("ekskul") || catLower.includes("lomba") || catLower.includes("sumpah")) {
         kategoriClass = "blue";
         kategoriIcon = "📢";
       } else {
@@ -411,22 +417,32 @@ function normalizePengumumanList(rawList) {
       }
     }
 
-    // Cari foto dari semua kemungkinan nama kolom yang diupload dari CMS
-    const uploadedPhoto = item.fotoUrl || item.bannerUrl || item.foto || item.gambar || item.thumbnail || item.foto_url || item.image || item.url || item.urlFoto || "";
-    let isCustomPhoto = false;
+    // Tentukan fallback SVG yang SPESIFIK sesuai topik kartu
     let fallbackSvg = "assets/img/pengumuman-sumpah-pemuda.svg";
-
-    if (kategoriClass === "green") {
+    if (kategoriClass === "green" || titleLower.includes("pts") || titleLower.includes("semester")) {
       fallbackSvg = "assets/img/pengumuman-pts.svg";
-    } else if (kategoriClass === "purple") {
+    } else if (kategoriClass === "purple" || titleLower.includes("orang tua") || titleLower.includes("rapat") || titleLower.includes("wali")) {
       fallbackSvg = "assets/img/pengumuman-rapat-ortu.svg";
     }
 
+    // Ambil foto yang diupload dari CMS (periksa storage lokal & database)
+    const localSavedPhoto = item.id ? localStorage.getItem("sdn_photo_" + item.id) : null;
+    const uploadedPhoto = localSavedPhoto || item.fotoUrl || item.bannerUrl || item.foto || item.gambar || item.thumbnail || item.foto_url || item.image || item.url || item.urlFoto || "";
+    let isCustomPhoto = false;
     let bannerUrl = "";
-    if (uploadedPhoto && uploadedPhoto.trim() !== "") {
+
+    if (uploadedPhoto && uploadedPhoto.trim() !== "" && !uploadedPhoto.endsWith(".svg")) {
+      // Foto sungguhan hasil upload CMS (Google Drive / Base64 / JPG / PNG)
       bannerUrl = formatPhotoUrl(uploadedPhoto.trim());
       isCustomPhoto = true;
+    } else if (uploadedPhoto && uploadedPhoto.includes("pts.svg")) {
+      bannerUrl = "assets/img/pengumuman-pts.svg";
+    } else if (uploadedPhoto && uploadedPhoto.includes("rapat-ortu.svg")) {
+      bannerUrl = "assets/img/pengumuman-rapat-ortu.svg";
+    } else if (uploadedPhoto && uploadedPhoto.includes("sumpah-pemuda.svg") && !titleLower.includes("pts") && !titleLower.includes("rapat") && !titleLower.includes("orang tua")) {
+      bannerUrl = "assets/img/pengumuman-sumpah-pemuda.svg";
     } else {
+      // Fallback spesifik berdasarkan topik (PTS -> buku, Rapat -> dewan guru, Kegiatan -> upacara)
       bannerUrl = fallbackSvg;
     }
 
@@ -443,14 +459,16 @@ function normalizePengumumanList(rawList) {
       fallbackSvg,
       isi: item.isi || ""
     };
-  });
+  };
 
-  // Jika item kurang dari 3, gabungkan dengan default featured agar grid 3 kolom tetap rapi dan identik Gambar 1
+  const processed = rawList.map(mapSingleItem);
+
+  // Jika item kurang dari 3, gabungkan dengan default featured agar grid 3 kolom tetap rapi dan masing-masing memiliki banner unik
   if (processed.length < 3) {
     const existingTitles = processed.map((x) => x.judul.toLowerCase());
     for (const def of DEFAULT_FEATURED_PENGUMUMAN) {
       if (!existingTitles.some((t) => t.includes(def.judul.toLowerCase()) || def.judul.toLowerCase().includes(t))) {
-        processed.push(def);
+        processed.push(mapSingleItem(def, processed.length));
         if (processed.length >= 3) break;
       }
     }
@@ -1179,7 +1197,7 @@ function handleThumbError(imgEl, driveId, fallbackSvg) {
     return;
   }
   imgEl.onerror = null;
-  imgEl.src = fallbackSvg || "assets/img/pengumuman-sumpah-pemuda.svg";
+  imgEl.src = fallbackSvg || "assets/img/pengumuman-pts.svg";
 }
 window.handleThumbError = handleThumbError;
 

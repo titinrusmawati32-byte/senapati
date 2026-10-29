@@ -613,18 +613,7 @@ function adminDeleteRow(sheetName, id, session) {
   if (!sheet) throw new Error("Sheet tidak ditemukan: " + sheetName);
 
   const values = sheet.getDataRange().getValues();
-  let headers = values[0].map(h => String(h).trim());
-
-  // Pastikan kolom fotoUrl dan kategori otomatis dibuat jika belum ada di sheet
-  if (data.fotoUrl !== undefined && !headers.includes("fotoUrl")) {
-    sheet.getRange(1, headers.length + 1).setValue("fotoUrl");
-    headers.push("fotoUrl");
-  }
-  if (data.kategori !== undefined && !headers.includes("kategori")) {
-    sheet.getRange(1, headers.length + 1).setValue("kategori");
-    headers.push("kategori");
-  }
-
+  const headers = values[0].map(h => String(h).trim());
   const idColIdx = headers.indexOf("id");
 
   for (let i = 1; i < values.length; i++) {
@@ -647,18 +636,7 @@ function adminToggleRow(sheetName, id, tampil, session) {
   if (!sheet) throw new Error("Sheet tidak ditemukan: " + sheetName);
 
   const values = sheet.getDataRange().getValues();
-  let headers = values[0].map(h => String(h).trim());
-
-  // Pastikan kolom fotoUrl dan kategori otomatis dibuat jika belum ada di sheet
-  if (data.fotoUrl !== undefined && !headers.includes("fotoUrl")) {
-    sheet.getRange(1, headers.length + 1).setValue("fotoUrl");
-    headers.push("fotoUrl");
-  }
-  if (data.kategori !== undefined && !headers.includes("kategori")) {
-    sheet.getRange(1, headers.length + 1).setValue("kategori");
-    headers.push("kategori");
-  }
-
+  const headers = values[0].map(h => String(h).trim());
   const idColIdx = headers.indexOf("id");
   const tampilColIdx = headers.indexOf("tampil");
 

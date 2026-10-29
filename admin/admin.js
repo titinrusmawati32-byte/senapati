@@ -1039,11 +1039,19 @@
 
     toggleStatus: async function (sheetName, id, currentTampil) {
       try {
+        // Pembaruan instan pada tampilan lokal (Optimistic UI)
+        if (AppState.collections && AppState.collections[sheetName]) {
+          const item = AppState.collections[sheetName].find((x) => String(x.id) === String(id));
+          if (item) item.tampil = !currentTampil;
+          renderCollectionTable(sheetName, AppState.collections[sheetName]);
+        }
+
         await apiCall("admin_toggleRow", { sheetName, id, tampil: !currentTampil });
-        showToast(`Status tayang ${sheetName} diperbarui!`, "success");
+        showToast(`Status tayang ${sheetName} berhasil diperbarui!`, "success");
         loadCollection(sheetName);
       } catch (e) {
         showToast("Gagal memperbarui status: " + e.message, "error");
+        loadCollection(sheetName);
       }
     }
   };

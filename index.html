@@ -56,281 +56,111 @@
   </header>
 
   <main>
-    <!-- Hero Banner Modern Split (Gaya Anaverse) dengan Video Opening Frame Membulat -->
-    <section class="hero-anaverse">
-      <div class="container">
-        <div class="hero-split-grid">
-          <div class="hero-info-col">
-            <div class="hero-pill-badge">
-              <span>💙</span> Pendidikan Berkualitas &amp; Berkarakter
-            </div>
-            <h1>Pendidikan Terbaik untuk <span class="text-highlight">Masa Depan</span> Anak Anda</h1>
-            <p>Selamat datang di <span data-config="namaSekolah">SD Negeri Sumberejo 04</span>. Kami mendidik dengan hati, memfasilitasi setiap potensi siswa untuk berkembang secara holistik dalam suasana belajar yang menyenangkan dan berkarakter mulia.</p>
-            <div class="hero-actions">
-              <a href="profil.html" class="btn btn-primary">Kenali Sekolah Kami &rarr;</a>
-              <a href="daftar.html" class="btn btn-outline">Daftar SPMB Online 📋</a>
-            </div>
-          </div>
-
-          <div class="hero-media-col">
-            <div class="hero-video-frame">
-              <video autoplay muted loop playsinline id="heroBgVideo">
-                <source src="assets/video/opening.mp4" type="video/mp4">
-              </video>
-              <div class="hero-video-badge">
-                <span>🏫</span> <span data-config="namaSekolah">SDN SUMBEREJO 04</span>
-              </div>
-            </div>
-          </div>
+    <!-- Hero Banner dengan Latar Video Opening -->
+    <section class="hero hero-with-video">
+      <div class="hero-video-wrapper">
+        <video autoplay muted loop playsinline class="hero-video-element" id="heroBgVideo">
+          <source src="assets/video/opening.mp4" type="video/mp4">
+        </video>
+        <div class="hero-video-overlay"></div>
+      </div>
+      <div class="container hero-content">
+        <div class="hero-badge">✨ Penerimaan Murid Baru Telah Dibuka</div>
+        <h1>Membangun Karakter Luhur & Generasi Berprestasi</h1>
+        <p>Selamat datang di <span data-config="namaSekolah">SD Negeri Sumberejo 03</span>. Kami mendidik dengan hati, memfasilitasi setiap potensi siswa untuk berkembang secara holistik dalam suasana belajar yang menyenangkan dan berkarakter.</p>
+        <div class="hero-actions">
+          <a href="daftar.html" class="btn btn-secondary">Daftar SPMB Online</a>
+          <a href="profil.html" class="btn btn-outline">Kenali Sekolah Kami</a>
         </div>
       </div>
     </section>
 
-    <!-- Floating Horizontal Stat Pill Bar (4 Metrik dengan Lingkaran Biru Lembut) -->
-    <div class="container stat-pill-container">
-      <div class="stat-pill-bar">
-        <div class="stat-pill-item">
-          <div class="stat-pill-icon">👨‍🏫</div>
-          <div class="stat-pill-data">
-            <span class="stat-pill-number" data-config="jumlahGuru">14+</span>
-            <span class="stat-pill-label">Guru &amp; Tenaga Ahli</span>
-          </div>
+    <!-- Statistik Sekolah -->
+    <section class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" data-config="akreditasi">A</div>
+          <div class="stat-label">Akreditasi BAN-S/M</div>
         </div>
-        <div class="stat-pill-item">
-          <div class="stat-pill-icon">🎒</div>
-          <div class="stat-pill-data">
-            <span class="stat-pill-number" data-config="jumlahSiswa">180+</span>
-            <span class="stat-pill-label">Siswa Aktif</span>
-          </div>
+        <div class="stat-card">
+          <div class="stat-number" data-config="jumlahSiswa">180+</div>
+          <div class="stat-label">Siswa Aktif</div>
         </div>
-        <div class="stat-pill-item">
-          <div class="stat-pill-icon">🏆</div>
-          <div class="stat-pill-data">
-            <span class="stat-pill-number" data-config="akreditasi">A</span>
-            <span class="stat-pill-label">Akreditasi BAN-S/M</span>
-          </div>
+        <div class="stat-card">
+          <div class="stat-number" data-config="jumlahGuru">14</div>
+          <div class="stat-label">Guru & Tenaga Ahli</div>
         </div>
-        <div class="stat-pill-item">
-          <div class="stat-pill-icon">⭐</div>
-          <div class="stat-pill-data">
-            <span class="stat-pill-number" style="color: var(--primary);">100%</span>
-            <span class="stat-pill-label">Kelulusan &amp; Karakter</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Seksi Tentang Kami (Profil & Sambutan Kepala Sekolah) -->
-    <section class="section" id="tentang">
-      <div class="container">
-        <div class="anaverse-about-grid">
-          <div class="about-visual-col">
-            <div class="about-visual-box">
-              <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #ffffff; padding: 2rem; text-align: center; background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); width: 100%;">
-                <div style="font-size: 4rem; margin-bottom: 0.75rem;">🏫</div>
-                <h3 style="color: #ffffff; margin-bottom: 0.5rem; font-size: 1.5rem;" data-config="namaSekolah">SDN SUMBEREJO 04</h3>
-                <p style="color: #bfdbfe; font-size: 0.95rem; margin: 0; max-width: 320px;">Unggul dalam Prestasi Akademik, Santun dalam Budi Pekerti</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="about-content-col">
-            <div class="badge-pill">Tentang Kami ℹ️</div>
-            <h2 style="font-size: 2.3rem; margin-bottom: 1rem; color: #0f172a; line-height: 1.25;">SD Negeri Sumberejo 04 Untuk Generasi Unggul</h2>
-            <blockquote style="font-size: 1.05rem; line-height: 1.7; color: #475569; border-left: 4px solid var(--primary); padding-left: 1.25rem; margin-bottom: 1.5rem; font-style: italic;" data-config="sambutanKepsek">
-              "Puji syukur ke hadirat Tuhan Yang Maha Esa. Kami mendidik dengan sepenuh hati demi mencetak generasi cerdas, berkarakter mulia, serta siap menyongsong masa depan di era digital."
-            </blockquote>
-
-            <div class="mini-features-grid">
-              <div class="mini-feature-item">
-                <div class="mini-feature-icon">🕒</div>
-                <div>
-                  <h4>Pembelajaran Aktif</h4>
-                  <p>Metode belajar interaktif dan Kurikulum Merdeka yang menyenangkan.</p>
-                </div>
-              </div>
-              <div class="mini-feature-item">
-                <div class="mini-feature-icon">👨‍🏫</div>
-                <div>
-                  <h4>Guru Profesional</h4>
-                  <p>Tenaga pendidik tersertifikasi, ramah, dan berdedikasi tinggi.</p>
-                </div>
-              </div>
-              <div class="mini-feature-item">
-                <div class="mini-feature-icon">🏫</div>
-                <div>
-                  <h4>Fasilitas Lengkap</h4>
-                  <p>Sarana kelas nyaman, lab komputer, perpustakaan, dan area olahraga.</p>
-                </div>
-              </div>
-              <div class="mini-feature-item">
-                <div class="mini-feature-icon">🌟</div>
-                <div>
-                  <h4>Karakter &amp; Religi</h4>
-                  <p>Pembiasaan sholat berjamaah, doa bersama, dan santun budi pekerti.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color: var(--secondary);">100%</div>
+          <div class="stat-label">Kelulusan & Berkarakter</div>
         </div>
       </div>
     </section>
 
-    <!-- Seksi Program Unggulan Sekolah (6 Card Grid Anaverse) -->
-    <section class="section" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
-      <div class="container">
-        <div class="section-top-flex">
-          <div>
-            <div class="badge-pill">Layanan Kami 🎯</div>
-            <h2>Program Unggulan Sekolah</h2>
-          </div>
-          <a href="program.html" class="section-view-all">Lihat Semua Program &rarr;</a>
-        </div>
-
-        <div class="program-grid-anaverse">
-          <div class="program-card-anaverse">
-            <div class="program-card-banner"></div>
-            <div class="program-card-icon">📘</div>
-            <h3 class="program-card-title">Kurikulum Merdeka</h3>
-            <p class="program-card-desc">Fokus pada bakat &amp; minat siswa mandiri.</p>
-          </div>
-          <div class="program-card-anaverse">
-            <div class="program-card-banner"></div>
-            <div class="program-card-icon">🏕️</div>
-            <h3 class="program-card-title">Pramuka &amp; Karakter</h3>
-            <p class="program-card-desc">Kedisiplinan, kemandirian, dan kepemimpinan.</p>
-          </div>
-          <div class="program-card-anaverse">
-            <div class="program-card-banner"></div>
-            <div class="program-card-icon">💡</div>
-            <h3 class="program-card-title">Literasi &amp; Numerasi</h3>
-            <p class="program-card-desc">Penguatan membaca, sains, dan daya nalar.</p>
-          </div>
-          <div class="program-card-anaverse">
-            <div class="program-card-banner"></div>
-            <div class="program-card-icon">🕌</div>
-            <h3 class="program-card-title">Sholat &amp; Tahfidz</h3>
-            <p class="program-card-desc">Pembinaan ibadah dan akhlak islami sejak dini.</p>
-          </div>
-          <div class="program-card-anaverse">
-            <div class="program-card-banner"></div>
-            <div class="program-card-icon">💻</div>
-            <h3 class="program-card-title">Kelas Digital &amp; TIK</h3>
-            <p class="program-card-desc">Pengenalan komputer &amp; literasi teknologi.</p>
-          </div>
-          <div class="program-card-anaverse">
-            <div class="program-card-banner"></div>
-            <div class="program-card-icon">🤝</div>
-            <h3 class="program-card-title">Bimbingan Ramah</h3>
-            <p class="program-card-desc">Layanan konseling ramah anak &amp; peduli bakat.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Seksi Dewan Pendidik (Gaya Dokter Spesialis Anaverse) -->
+    <!-- Sambutan Kepala Sekolah -->
     <section class="section">
       <div class="container">
-        <div class="teacher-section-anaverse">
-          <div class="teacher-intro-col">
-            <div class="badge-pill">Pendidik Kami 👨‍🏫</div>
-            <h2>Guru Berdedikasi &amp; Berpengalaman</h2>
-            <p>Tim pendidik kami siap membimbing putra-putri Anda dengan penuh kasih, keteladanan, dan kompetensi profesional di bidangnya.</p>
-            <a href="guru.html" class="btn btn-primary">Lihat Semua Guru &rarr;</a>
+        <div class="section-header">
+          <h2 class="section-title">Sambutan Kepala Sekolah</h2>
+        </div>
+        <div style="background: #ffffff; padding: 2.25rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.5rem;">
+          <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;">
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 2rem; border: 2px solid var(--primary);">
+              👨‍🏫
+            </div>
+            <div>
+              <h3 style="margin-bottom: 0.2rem; font-size: 1.25rem;">Kepala Sekolah <span data-config="namaSekolah">SD Negeri Sumberejo 03</span></h3>
+              <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Membina dengan Sepenuh Hati untuk Generasi Penerus Bangsa</p>
+            </div>
           </div>
+          <blockquote style="font-size: 1.05rem; line-height: 1.7; color: var(--text-main); border-left: 4px solid var(--secondary); padding-left: 1.25rem; font-style: italic;" data-config="sambutanKepsek">
+            "Puji syukur ke hadirat Tuhan Yang Maha Esa. Kami menyambut hangat kehadiran Anda di situs resmi SD Negeri Sumberejo 04. Kami terus berupaya menghadirkan pendidikan bermutu, berkarakter mulia, serta membekali anak-anak kita dengan kecakapan literasi dan teknologi di era modern ini."
+          </blockquote>
+        </div>
+      </div>
+    </section>
 
-          <div class="teacher-grid-anaverse" id="homeGuruContainer">
-            <!-- Diisi otomatis oleh JavaScript dari Cache / Server -->
-            <div class="teacher-card-anaverse">
-              <div class="teacher-card-photo-box" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #ffffff;">
-                <div style="font-size: 3.5rem; font-weight: 800;">R</div>
-              </div>
-              <div class="teacher-card-info">
-                <h4 class="teacher-card-name">Reza Fahlevi, S.Pd</h4>
-                <span class="teacher-card-role">Operator &amp; Guru TIK</span>
-                <span class="teacher-rating-badge">⭐ 4.9</span>
-              </div>
+    <!-- Keunggulan Sekolah -->
+    <section class="section section-alt">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Keunggulan Kami</h2>
+          <p class="section-subtitle">Mengapa memilih <span data-config="namaSekolah">SD Negeri Sumberejo 03</span> untuk pendidikan dasar putra-putri tercinta?</p>
+        </div>
+        <div class="card-grid tri-col">
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🏆</div>
+              <h3 class="card-title">Kurikulum Berkarakter</h3>
+              <p>Menerapkan Kurikulum Merdeka yang menumbuhkan Profil Pelajar Pancasila, kejujuran, disiplin, dan kreativitas mandiri.</p>
             </div>
-            <div class="teacher-card-anaverse">
-              <div class="teacher-card-photo-box" style="background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%); color: #ffffff;">
-                <div style="font-size: 3.5rem; font-weight: 800;">S</div>
-              </div>
-              <div class="teacher-card-info">
-                <h4 class="teacher-card-name">Siti Aminah, S.Pd.SD</h4>
-                <span class="teacher-card-role">Guru Kelas Rendah</span>
-                <span class="teacher-rating-badge">⭐ 4.9</span>
-              </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">👥</div>
+              <h3 class="card-title">Guru Berdedikasi</h3>
+              <p>Didukung pendidik berijazah sarjana pendidikan yang tersertifikasi, ramah anak, dan berpengalaman di bidangnya.</p>
             </div>
-            <div class="teacher-card-anaverse">
-              <div class="teacher-card-photo-box" style="background: linear-gradient(135deg, #16a34a 0%, #4ade80 100%); color: #ffffff;">
-                <div style="font-size: 3.5rem; font-weight: 800;">B</div>
-              </div>
-              <div class="teacher-card-info">
-                <h4 class="teacher-card-name">Budi Santoso, S.Pd</h4>
-                <span class="teacher-card-role">Guru PJOK</span>
-                <span class="teacher-rating-badge">⭐ 4.8</span>
-              </div>
-            </div>
-            <div class="teacher-card-anaverse">
-              <div class="teacher-card-photo-box" style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%); color: #ffffff;">
-                <div style="font-size: 3.5rem; font-weight: 800;">M</div>
-              </div>
-              <div class="teacher-card-info">
-                <h4 class="teacher-card-name">Meli Agustina, S.Pd.I</h4>
-                <span class="teacher-card-role">Guru PAI</span>
-                <span class="teacher-rating-badge">⭐ 4.9</span>
-              </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🌳</div>
+              <h3 class="card-title">Lingkungan Asri & Aman</h3>
+              <p>Suasana belajar yang teduh, nyaman, bersih, serta aman dan kondusif untuk mendukung tumbuh kembang siswa.</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Seksi Fasilitas Modern (Kontainer Navy Mewah Anaverse) -->
-    <div class="container">
-      <div class="navy-facility-wrapper">
-        <div class="navy-facility-header">
-          <h2>Fasilitas Modern untuk Belajar Nyaman</h2>
-          <p>Sarana dan prasarana lengkap dan terawat untuk mendukung kenyamanan, keamanan, dan prestasi maksimal setiap peserta didik.</p>
-        </div>
-
-        <div class="navy-facility-grid">
-          <div class="navy-facility-card">
-            <div class="navy-facility-img">🏫</div>
-            <div class="navy-facility-name">Ruang Kelas Digital</div>
-          </div>
-          <div class="navy-facility-card">
-            <div class="navy-facility-img">💻</div>
-            <div class="navy-facility-name">Lab Komputer &amp; TIK</div>
-          </div>
-          <div class="navy-facility-card">
-            <div class="navy-facility-img">📚</div>
-            <div class="navy-facility-name">Perpustakaan Lengkap</div>
-          </div>
-          <div class="navy-facility-card">
-            <div class="navy-facility-img">⚽</div>
-            <div class="navy-facility-name">Lapangan Olahraga</div>
-          </div>
-          <div class="navy-facility-card">
-            <div class="navy-facility-img">🏥</div>
-            <div class="navy-facility-name">UKS &amp; Ramah Anak</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Seksi Pengumuman & Berita Terbaru (Gaya Card Anaverse) -->
+    <!-- Pengumuman Terbaru -->
     <section class="section">
       <div class="container">
-        <div class="section-top-flex">
-          <div>
-            <div class="badge-pill">Informasi Terkini 📢</div>
-            <h2>Pengumuman &amp; Berita Sekolah</h2>
-          </div>
-          <a href="#pengumumanContainer" class="section-view-all">Lihat Semua Pengumuman &rarr;</a>
+        <div class="section-header">
+          <h2 class="section-title">Pengumuman Terbaru</h2>
+          <p class="section-subtitle">Informasi penting, agenda akademik, dan pengumuman sekolah</p>
         </div>
-
-        <div class="news-grid-anaverse" id="pengumumanContainer">
+        <div class="card-grid tri-col" id="pengumumanContainer">
           <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2.5rem;">
             Memuat pengumuman terbaru...
           </div>
@@ -338,35 +168,14 @@
       </div>
     </section>
 
-    <!-- Seksi Banner Call-to-Action Modern (Gaya Anaverse "Butuh Bantuan") -->
-    <div class="container">
-      <div class="cta-banner-anaverse">
-        <div class="cta-info-col">
-          <h2>Siap Menjadi Bagian dari Keluarga Kami?</h2>
-          <p>Penerimaan Murid Baru (SPMB) telah dibuka. Kami siap melayani konsultasi pendaftaran online &amp; offline demi masa depan putra-putri Anda tercinta.</p>
-          <div class="cta-badges-row">
-            <span class="cta-badge-item">🕒 Layanan 07:00 - 13:00 WIB</span>
-            <span class="cta-badge-item">🎓 Bebas Biaya Pendaftaran</span>
-            <span class="cta-badge-item">🏫 Kuota Terbatas</span>
-          </div>
-        </div>
-
-        <div class="cta-card-col">
-          <div class="cta-card-white">
-            <div class="cta-card-header">
-              <div class="cta-card-icon">📞</div>
-              <div>
-                <div class="cta-card-title">Hubungi Kami Langsung</div>
-                <a href="tel:0338123456" class="cta-card-phone" data-config="telepon">(0338) 123456</a>
-              </div>
-            </div>
-            <a href="https://wa.me/6281234567890" class="btn btn-primary" data-config="whatsapp" style="width: 100%;">
-              Konsultasi WhatsApp &rarr;
-            </a>
-          </div>
-        </div>
+    <!-- Banner Call to Action SPMB -->
+    <section class="section" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: #ffffff; text-align: center;">
+      <div class="container">
+        <h2 style="color: #ffffff; margin-bottom: 1rem;">Siap Menjadi Bagian dari Keluarga Kami?</h2>
+        <p style="color: #e2e8f0; max-width: 600px; margin: 0 auto 1.75rem;">Proses pendaftaran online mudah, cepat, dan transparan. Tidak dipungut biaya pendaftaran.</p>
+        <a href="daftar.html" class="btn btn-secondary">Daftar Murid Baru Sekarang</a>
       </div>
-    </div>
+    </section>
   </main>
 
   <!-- Tombol WhatsApp Mengambang -->

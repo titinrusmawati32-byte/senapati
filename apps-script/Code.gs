@@ -142,6 +142,16 @@ function doPost(e) {
         return ok(adminUploadMedia(body.berkas, body.alt, session));
       case "admin_listMedia":
         return ok(getPublicRowsFromSheet("Media"));
+      case "admin_getCollection":
+        return ok(adminGetCollection(body.sheetName, session));
+      case "admin_saveRow":
+        return ok(adminSaveRow(body.sheetName, body.data, session));
+      case "admin_deleteRow":
+        return ok(adminDeleteRow(body.sheetName, body.id, session));
+      case "admin_toggleRow":
+        return ok(adminToggleRow(body.sheetName, body.id, body.tampil, session));
+      case "admin_uploadVideo":
+        return ok(adminUploadVideo(body.berkas, body.judul, session));
       case "admin_listUsers":
         return ok(adminListUsers(session));
       case "admin_listLog":
@@ -492,6 +502,167 @@ function logActivity(user, aksi, modul, ringkasan) {
       user, aksi, modul, ringkasan
     ]);
   } catch (e) {}
+}
+
+function adminGetCollection(sheetName, session) {
+  const allowed = ["Pengumuman", "Guru", "Ekstrakurikuler", "Fasilitas", "Galeri"];
+  if (!allowed.includes(sheetName)) {
+    throw new Error("Koleksi tidak diizinkan: " + sheetName);
+  }
+
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return [];
+
+  const values = sheet.getDataRange().getValues();
+  if (values.length <= 1) return [];
+
+  const headers = values[0].map(h => String(h).trim());
+  const results = [];
+
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    const obj = {};
+    headers.forEach((h, colIdx) => {
+      let val = row[colIdx];
+      if (val instanceof Date) {
+        val = Utilities.formatDate(val, "Asia/Jakarta", "yyyy-MM-dd");
+      }
+      obj[h] = val !== undefined ? val : "";
+    });
+    results.push(obj);
+  }
+
+  if (headers.includes("urutan")) {
+    results.sort((a, b) => (Number(a.urutan) || 999) - (Number(b.urutan) || 999));
+  } else if (headers.includes("tanggal")) {
+    results.sort((a, b) => new Date(b.tanggal || 0).getTime() - new Date(a.tanggal || 0).getTime());
+  }
+
+  return results;
+}
+
+function adminSaveRow(sheetName, data, session) {
+  if (session.peran === "admin_spmb") {
+    throw new Error("Admin SPMB tidak memiliki akses mengubah koleksi ini.");
+  }
+  const allowed = ["Pengumuman", "Guru", "Ekstrakurikuler", "Fasilitas", "Galeri"];
+  if (!allowed.includes(sheetName)) throw new Error("Koleksi tidak valid: " + sheetName);
+
+  const ss = getSpreadsheet();
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet) throw new Error("Sheet tidak ditemukan: " + sheetName);
+
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0].map(h => String(h).trim());
+  const idColIdx = headers.indexOf("id");
+
+  let targetRowIdx = -1;
+  let rowId = data.id;
+
+  if (rowId) {
+    for (let i = 1; i < values.length; i++) {
+      if (String(values[i][idColIdx]).trim() === String(rowId).trim()) {
+        targetRowIdx = i + 1;
+        break;
+      }
+    }
+  }
+
+  if (targetRowIdx === -1) {
+    rowId = sheetName.substring(0, 3).toUpperCase() + "-" + Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyyMMdd-HHmmss");
+    data.id = rowId;
+    if (data.tampil === undefined) data.tampil = true;
+
+    const newRow = headers.map(h => {
+      return data[h] !== undefined ? data[h] : "";
+    });
+
+    sheet.appendRow(newRow);
+    logActivity(session.namaPengguna, "TAMBAH_" + sheetName.toUpperCase(), sheetName, `Menambah data ID: ${rowId}`);
+  } else {
+    headers.forEach((h, colIdx) => {
+      if (h !== "id" && data[h] !== undefined) {
+        sheet.getRange(targetRowIdx, colIdx + 1).setValue(data[h]);
+      }
+    });
+    logActivity(session.namaPengguna, "UBAH_" + sheetName.toUpperCase(), sheetName, `Mengubah data ID: ${rowId}`);
+  }
+
+  SpreadsheetApp.flush();
+  return { success: true, id: rowId, data: data };
+}
+
+function adminDeleteRow(sheetName, id, session) {
+  if (session.peran === "admin_spmb") {
+    throw new Error("Admin SPMB tidak memiliki akses menghapus data ini.");
+  }
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) throw new Error("Sheet tidak ditemukan: " + sheetName);
+
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0].map(h => String(h).trim());
+  const idColIdx = headers.indexOf("id");
+
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][idColIdx]).trim() === String(id).trim()) {
+      sheet.deleteRow(i + 1);
+      SpreadsheetApp.flush();
+      logActivity(session.namaPengguna, "HAPUS_" + sheetName.toUpperCase(), sheetName, `Menghapus data ID: ${id}`);
+      return { success: true, id: id };
+    }
+  }
+  throw new Error("Data ID tidak ditemukan.");
+}
+
+function adminToggleRow(sheetName, id, tampil, session) {
+  if (session.peran === "admin_spmb") {
+    throw new Error("Admin SPMB tidak memiliki akses.");
+  }
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) throw new Error("Sheet tidak ditemukan: " + sheetName);
+
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0].map(h => String(h).trim());
+  const idColIdx = headers.indexOf("id");
+  const tampilColIdx = headers.indexOf("tampil");
+
+  if (tampilColIdx === -1) throw new Error("Kolom tampil tidak ditemukan.");
+
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][idColIdx]).trim() === String(id).trim()) {
+      sheet.getRange(i + 1, tampilColIdx + 1).setValue(Boolean(tampil));
+      SpreadsheetApp.flush();
+      return { success: true, id: id, tampil: Boolean(tampil) };
+    }
+  }
+  throw new Error("Data ID tidak ditemukan.");
+}
+
+function adminUploadVideo(berkas, judul, session) {
+  if (session.peran === "admin_spmb") {
+    throw new Error("Admin SPMB tidak memiliki akses.");
+  }
+  const folder = getPublicContentFolder();
+  const id = "VID-" + Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyyMMdd-HHmmss");
+  const fileName = id + "_" + (berkas.nama || "video.mp4");
+  const decoded = Utilities.base64Decode(berkas.base64);
+  const blob = Utilities.newBlob(decoded, berkas.mime || "video/mp4", fileName);
+
+  const file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  const directUrl = `https://drive.google.com/file/d/${file.getId()}/preview`;
+
+  logActivity(session.namaPengguna, "UNGGAH_VIDEO", "Galeri", `Unggah video ${berkas.nama}`);
+
+  return {
+    id: id,
+    url: directUrl,
+    fileId: file.getId()
+  };
 }
 
 // ==========================================

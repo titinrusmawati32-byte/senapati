@@ -622,6 +622,27 @@
     </div>
   </div>
 
+  <!-- ==========================================
+       MODAL: FORM KOLEKSI & UPLOAD MEDIA (FOTO & VIDEO)
+       ========================================== -->
+  <div class="modal-overlay" id="modalCollection">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="card-title" id="mCollectionTitle">Kelola Data</h3>
+        <button type="button" class="btn btn-outline btn-sm" onclick="AppCollections.closeModal()">✕</button>
+      </div>
+      <form id="formCollectionItem">
+        <div class="modal-body" id="mCollectionBody">
+          <!-- Form dinamis diisi oleh JavaScript -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="AppCollections.closeModal()">Batal</button>
+          <button type="submit" id="btnSubmitCollection" class="btn btn-primary">Simpan Data</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Wadah Toast Notifikasi -->
   <div class="toast-container" id="toastContainer"></div>
 

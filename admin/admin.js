@@ -635,17 +635,520 @@
   }
 
   // ==========================================
-  // 8. MANAJEMEN KOLEKSI (CRUD)
+  // 8. MANAJEMEN KOLEKSI (CRUD LENGKAP & MEDIA UPLOAD FOTO/VIDEO)
   // ==========================================
+  AppState.collections = {};
+
   async function loadCollection(sheetName) {
-    // Dipanggil saat membuka tab koleksi
+    const tableIds = {
+      Pengumuman: "tablePengumumanBody",
+      Guru: "tableGuruBody",
+      Ekstrakurikuler: "tableEkskulBody",
+      Fasilitas: "tableFasilitasBody",
+      Galeri: "tableGaleriBody"
+    };
+
+    const tbody = document.getElementById(tableIds[sheetName]);
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Memuat data ${sheetName}...</td></tr>`;
+
+    try {
+      const items = await apiCall("admin_getCollection", { sheetName: sheetName });
+      AppState.collections[sheetName] = items || [];
+      renderCollectionTable(sheetName, AppState.collections[sheetName]);
+    } catch (err) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--danger); padding: 1.5rem;">Gagal memuat: ${escapeHtml(err.message)}</td></tr>`;
+    }
   }
 
-  window.AppCollections = {
-    openModal: function (sheetName) {
-      showToast(`Fitur tambah ${sheetName} dibuka.`);
+  function renderCollectionTable(sheetName, items) {
+    const tableIds = {
+      Pengumuman: "tablePengumumanBody",
+      Guru: "tableGuruBody",
+      Ekstrakurikuler: "tableEkskulBody",
+      Fasilitas: "tableFasilitasBody",
+      Galeri: "tableGaleriBody"
+    };
+
+    const tbody = document.getElementById(tableIds[sheetName]);
+    if (!tbody) return;
+
+    if (!items || items.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada data ${sheetName}. Silakan klik tombol '+ Tambah' di atas.</td></tr>`;
+      return;
+    }
+
+    if (sheetName === "Pengumuman") {
+      tbody.innerHTML = items
+        .map(
+          (it) => `
+        <tr>
+          <td><strong>${escapeHtml(it.judul)}</strong><br><small style="color: var(--text-muted);">${escapeHtml(it.isi ? it.isi.substring(0, 60) + '...' : '')}</small></td>
+          <td>${it.tanggal || "-"}</td>
+          <td>${renderStatusToggle(sheetName, it.id, it.tampil)}</td>
+          <td>
+            <div style="display: flex; gap: 0.35rem;">
+              <button class="btn btn-outline btn-sm" onclick='AppCollections.openModal("${sheetName}", ${JSON.stringify(it)})'>✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" onclick='AppCollections.deleteItem("${sheetName}", "${it.id}")'>🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `
+        )
+        .join("");
+    } else if (sheetName === "Guru") {
+      tbody.innerHTML = items
+        .map(
+          (it) => `
+        <tr>
+          <td><strong>${it.urutan || 99}</strong></td>
+          <td>
+            ${it.fotoUrl ? `<img src="${it.fotoUrl}" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border);">` : `<div style="width: 44px; height: 44px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">👨‍🏫</div>`}
+          </td>
+          <td><strong>${escapeHtml(it.nama)}</strong></td>
+          <td>${escapeHtml(it.jabatan)}</td>
+          <td>${renderStatusToggle(sheetName, it.id, it.tampil)}</td>
+          <td>
+            <div style="display: flex; gap: 0.35rem;">
+              <button class="btn btn-outline btn-sm" onclick='AppCollections.openModal("${sheetName}", ${JSON.stringify(it)})'>✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" onclick='AppCollections.deleteItem("${sheetName}", "${it.id}")'>🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `
+        )
+        .join("");
+    } else if (sheetName === "Ekstrakurikuler") {
+      tbody.innerHTML = items
+        .map(
+          (it) => `
+        <tr>
+          <td>
+            <strong>${escapeHtml(it.nama)}</strong>
+            ${it.fotoUrl ? `<br><small><a href="${it.fotoUrl}" target="_blank">Lihat Foto Kegiatan</a></small>` : ""}
+          </td>
+          <td>${escapeHtml(it.pembina || "-")}</td>
+          <td>${escapeHtml(it.jadwal || "-")}</td>
+          <td>${renderStatusToggle(sheetName, it.id, it.tampil)}</td>
+          <td>
+            <div style="display: flex; gap: 0.35rem;">
+              <button class="btn btn-outline btn-sm" onclick='AppCollections.openModal("${sheetName}", ${JSON.stringify(it)})'>✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" onclick='AppCollections.deleteItem("${sheetName}", "${it.id}")'>🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `
+        )
+        .join("");
+    } else if (sheetName === "Fasilitas") {
+      tbody.innerHTML = items
+        .map(
+          (it) => `
+        <tr>
+          <td><strong>${it.urutan || 99}</strong></td>
+          <td>
+            ${it.fotoUrl ? `<img src="${it.fotoUrl}" style="width: 54px; height: 38px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border);">` : `<div style="width: 54px; height: 38px; border-radius: 4px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 1rem;">🏢</div>`}
+          </td>
+          <td><strong>${escapeHtml(it.nama)}</strong></td>
+          <td><small style="color: var(--text-muted);">${escapeHtml(it.deskripsi ? it.deskripsi.substring(0, 50) + '...' : '')}</small></td>
+          <td>${renderStatusToggle(sheetName, it.id, it.tampil)}</td>
+          <td>
+            <div style="display: flex; gap: 0.35rem;">
+              <button class="btn btn-outline btn-sm" onclick='AppCollections.openModal("${sheetName}", ${JSON.stringify(it)})'>✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" onclick='AppCollections.deleteItem("${sheetName}", "${it.id}")'>🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `
+        )
+        .join("");
+    } else if (sheetName === "Galeri") {
+      tbody.innerHTML = items
+        .map(
+          (it) => `
+        <tr>
+          <td>${it.tanggal || "-"}</td>
+          <td><strong>${escapeHtml(it.judul)}</strong></td>
+          <td>
+            <span class="badge ${it.tipe === 'video' ? 'badge-diproses' : 'badge-diterima'}">
+              ${it.tipe === 'video' ? '🎥 Video' : '📷 Foto'}
+            </span>
+          </td>
+          <td>
+            ${it.url ? `<a href="${it.url}" target="_blank" class="btn btn-outline btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.78rem;">Buka Media ↗</a>` : '<span style="color: var(--text-muted);">-</span>'}
+          </td>
+          <td>${renderStatusToggle(sheetName, it.id, it.tampil)}</td>
+          <td>
+            <div style="display: flex; gap: 0.35rem;">
+              <button class="btn btn-outline btn-sm" onclick='AppCollections.openModal("${sheetName}", ${JSON.stringify(it)})'>✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" onclick='AppCollections.deleteItem("${sheetName}", "${it.id}")'>🗑️</button>
+            </div>
+          </td>
+        </tr>
+      `
+        )
+        .join("");
+    }
+  }
+
+  function renderStatusToggle(sheetName, id, status) {
+    const isTampil = status === true || String(status).toUpperCase() === "TRUE";
+    return `
+      <button type="button" class="btn btn-sm ${isTampil ? 'btn-outline' : 'btn-outline'}" 
+              style="padding: 0.2rem 0.5rem; font-size: 0.78rem; border-color: ${isTampil ? 'var(--success)' : 'var(--border)'}; color: ${isTampil ? 'var(--success)' : 'var(--text-muted)'};"
+              onclick="AppCollections.toggleStatus('${sheetName}', '${id}', ${isTampil})">
+        ${isTampil ? '👁️ Tayang' : '🔒 Sembunyi'}
+      </button>
+    `;
+  }
+
+  // Objek Global Manajemen Koleksi
+  const AppCollections = {
+    openModal: function (sheetName, item = null) {
+      AppState.currentModalSheet = sheetName;
+      AppState.currentEditItem = item;
+
+      const titleEl = document.getElementById("mCollectionTitle");
+      const bodyEl = document.getElementById("mCollectionBody");
+      const formEl = document.getElementById("formCollectionItem");
+
+      titleEl.textContent = (item ? "Ubah Data " : "Tambah Data ") + sheetName;
+
+      // Reset form
+      formEl.reset();
+
+      // Bangun elemen input sesuai modul
+      let fieldsHtml = `<input type="hidden" name="id" value="${item ? item.id : ''}">`;
+
+      if (sheetName === "Pengumuman") {
+        fieldsHtml += `
+          <div class="form-group">
+            <label class="form-label">Judul Pengumuman *</label>
+            <input type="text" name="judul" class="form-control" value="${escapeHtml(item ? item.judul : '')}" required placeholder="Contoh: Jadwal Libur Semester">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tanggal Pengumuman *</label>
+            <input type="date" name="tanggal" class="form-control" value="${item ? item.tanggal : new Date().toISOString().split('T')[0]}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Isi Lengkap Pengumuman *</label>
+            <textarea name="isi" rows="4" class="form-control" required placeholder="Tuliskan isi pengumuman secara rinci...">${escapeHtml(item ? item.isi : '')}</textarea>
+          </div>
+          ${renderPhotoUploadControl("fotoUrl", item ? item.fotoUrl : "", "Foto / Brosur Pengumuman (Opsional)")}
+        `;
+      } else if (sheetName === "Guru") {
+        fieldsHtml += `
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label class="form-label">Nama Lengkap & Gelar *</label>
+              <input type="text" name="nama" class="form-control" value="${escapeHtml(item ? item.nama : '')}" required placeholder="Contoh: Ahmad Fauzi, S.Pd.">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nomor Urutan Tampil</label>
+              <input type="number" name="urutan" class="form-control" value="${item ? item.urutan || 1 : 1}" min="1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Jabatan / Tugas Mengajar *</label>
+            <input type="text" name="jabatan" class="form-control" value="${escapeHtml(item ? item.jabatan : '')}" required placeholder="Contoh: Guru Kelas 5 / Pembina Pramuka">
+          </div>
+          ${renderPhotoUploadControl("fotoUrl", item ? item.fotoUrl : "", "Foto Resmi Guru (Langsung dari HP/Laptop)")}
+        `;
+      } else if (sheetName === "Ekstrakurikuler") {
+        fieldsHtml += `
+          <div class="form-group">
+            <label class="form-label">Nama Kegiatan Ekstrakurikuler *</label>
+            <input type="text" name="nama" class="form-control" value="${escapeHtml(item ? item.nama : '')}" required placeholder="Contoh: Pramuka Siaga">
+          </div>
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label class="form-label">Guru Pembina / Pelatih</label>
+              <input type="text" name="pembina" class="form-control" value="${escapeHtml(item ? item.pembina : '')}" placeholder="Contoh: Bapak Rudi, S.Pd.">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Jadwal Latihan</label>
+              <input type="text" name="jadwal" class="form-control" value="${escapeHtml(item ? item.jadwal : '')}" placeholder="Contoh: Setiap Jumat, 14:00 - 16:00">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deskripsi Kegiatan *</label>
+            <textarea name="deskripsi" rows="3" class="form-control" required placeholder="Jelaskan tujuan dan aktivitas kegiatan...">${escapeHtml(item ? item.deskripsi : '')}</textarea>
+          </div>
+          ${renderPhotoUploadControl("fotoUrl", item ? item.fotoUrl : "", "Foto Kegiatan Ekstrakurikuler")}
+        `;
+      } else if (sheetName === "Fasilitas") {
+        fieldsHtml += `
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label class="form-label">Nama Sarana / Fasilitas *</label>
+              <input type="text" name="nama" class="form-control" value="${escapeHtml(item ? item.nama : '')}" required placeholder="Contoh: Laboratorium Komputer">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nomor Urutan</label>
+              <input type="number" name="urutan" class="form-control" value="${item ? item.urutan || 1 : 1}" min="1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deskripsi Sarana *</label>
+            <textarea name="deskripsi" rows="3" class="form-control" required placeholder="Jelaskan sarana dan fungsinya...">${escapeHtml(item ? item.deskripsi : '')}</textarea>
+          </div>
+          ${renderPhotoUploadControl("fotoUrl", item ? item.fotoUrl : "", "Foto Fasilitas Sekolah")}
+        `;
+      } else if (sheetName === "Galeri") {
+        fieldsHtml += `
+          <div class="form-group">
+            <label class="form-label">Judul Dokumentasi Kegiatan *</label>
+            <input type="text" name="judul" class="form-control" value="${escapeHtml(item ? item.judul : '')}" required placeholder="Contoh: Upacara Hari Kemerdekaan RI">
+          </div>
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label class="form-label">Tanggal Kegiatan *</label>
+              <input type="date" name="tanggal" class="form-control" value="${item ? item.tanggal : new Date().toISOString().split('T')[0]}" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipe Media *</label>
+              <select name="tipe" id="selectGaleriTipe" class="form-control" onchange="AppCollections.handleGaleriTipeChange(this.value)">
+                <option value="foto" ${!item || item.tipe === 'foto' ? 'selected' : ''}>📷 Foto / Gambar</option>
+                <option value="video" ${item && item.tipe === 'video' ? 'selected' : ''}>🎥 Video Dokumentasi</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Wadah Kontrol Foto -->
+          <div id="galeriPhotoSection" style="display: ${!item || item.tipe === 'foto' ? 'block' : 'none'};">
+            ${renderPhotoUploadControl("url_foto", item && item.tipe === 'foto' ? item.url : "", "Pilih Foto Kegiatan (Otomatis Kompresi)")}
+          </div>
+
+          <!-- Wadah Kontrol Video -->
+          <div id="galeriVideoSection" style="display: ${item && item.tipe === 'video' ? 'block' : 'none'};">
+            <div class="form-group">
+              <label class="form-label">Tautan Video YouTube / Google Drive</label>
+              <input type="url" name="url_video" id="inputVideoUrl" class="form-control" value="${item && item.tipe === 'video' ? escapeHtml(item.url) : ''}" placeholder="Contoh: https://www.youtube.com/watch?v=... atau link Drive">
+              <small style="color: var(--text-muted); display: block; margin-top: 0.35rem;">
+                💡 Masukkan tautan YouTube atau unggah file video MP4 di bawah ini.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Atau Unggah Berkas Video (MP4) Langsung</label>
+              <input type="file" id="inputUploadVideoFile" accept="video/mp4,video/webm" class="form-control">
+              <div id="videoUploadProgress" style="display: none; margin-top: 0.5rem; font-size: 0.85rem; color: var(--primary);">
+                ⏳ Mengunggah video ke Google Drive...
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // Checkbox Status Tampil
+      const isChecked = item ? (item.tampil === true || String(item.tampil).toUpperCase() === "TRUE") : true;
+      fieldsHtml += `
+        <div class="form-group" style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" name="tampil" value="true" ${isChecked ? 'checked' : ''} style="width: 18px; height: 18px;">
+            <span style="font-weight: 600;">Tayangkan di Website Publik</span>
+          </label>
+        </div>
+      `;
+
+      bodyEl.innerHTML = fieldsHtml;
+
+      // Inisialisasi event upload foto lokal di dalam modal
+      initModalUploadEvents();
+
+      document.getElementById("modalCollection").classList.add("active");
+    },
+
+    closeModal: function () {
+      document.getElementById("modalCollection").classList.remove("active");
+    },
+
+    handleGaleriTipeChange: function (tipe) {
+      const pSec = document.getElementById("galeriPhotoSection");
+      const vSec = document.getElementById("galeriVideoSection");
+      if (pSec) pSec.style.display = tipe === "foto" ? "block" : "none";
+      if (vSec) vSec.style.display = tipe === "video" ? "block" : "none";
+    },
+
+    deleteItem: async function (sheetName, id) {
+      if (!confirm(`Apakah Anda yakin ingin menghapus data ${sheetName} ini?`)) return;
+
+      try {
+        await apiCall("admin_deleteRow", { sheetName, id });
+        showToast(`Data ${sheetName} berhasil dihapus!`, "success");
+        loadCollection(sheetName);
+      } catch (e) {
+        showToast("Gagal menghapus: " + e.message, "error");
+      }
+    },
+
+    toggleStatus: async function (sheetName, id, currentTampil) {
+      try {
+        await apiCall("admin_toggleRow", { sheetName, id, tampil: !currentTampil });
+        showToast(`Status tayang ${sheetName} diperbarui!`, "success");
+        loadCollection(sheetName);
+      } catch (e) {
+        showToast("Gagal memperbarui status: " + e.message, "error");
+      }
     }
   };
+  window.AppCollections = AppCollections;
+
+  function renderPhotoUploadControl(fieldName, currentVal, label) {
+    return `
+      <div class="form-group">
+        <label class="form-label">${label}</label>
+        <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+          <img id="previewColImg_${fieldName}" src="${currentVal || ''}" 
+               style="width: 72px; height: 72px; border-radius: var(--radius); object-fit: cover; background: #e2e8f0; border: 1px solid var(--border); display: ${currentVal ? 'block' : 'none'};">
+          <div style="flex: 1; min-width: 200px;">
+            <input type="file" id="fileColInput_${fieldName}" accept="image/jpeg,image/png,image/webp" class="form-control" style="font-size: 0.85rem;">
+            <div id="colUploadProgress_${fieldName}" style="display: none; font-size: 0.8rem; color: var(--primary); margin-top: 0.35rem;">
+              ⏳ Mengompresi dan mengunggah foto...
+            </div>
+          </div>
+        </div>
+        <input type="hidden" name="${fieldName}" id="valColInput_${fieldName}" value="${escapeHtml(currentVal || '')}">
+      </div>
+    `;
+  }
+
+  function initModalUploadEvents() {
+    // Tangani input file gambar di dalam modal
+    const fileInputs = document.querySelectorAll("[id^='fileColInput_']");
+    fileInputs.forEach((input) => {
+      input.addEventListener("change", async () => {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const fieldName = input.id.replace("fileColInput_", "");
+        const preview = document.getElementById("previewColImg_" + fieldName);
+        const progress = document.getElementById("colUploadProgress_" + fieldName);
+        const hiddenVal = document.getElementById("valColInput_" + fieldName);
+
+        if (progress) progress.style.display = "block";
+
+        try {
+          // Kompresi di browser (target < 600 KB)
+          const compressed = await ImageProcessor.compress(file);
+          if (progress) progress.textContent = `Mengunggah ${compressed.name} (${compressed.sizeFormatted})...`;
+
+          const res = await apiCall("admin_uploadMedia", {
+            berkas: {
+              nama: compressed.name,
+              mime: compressed.mime,
+              base64: compressed.base64
+            },
+            alt: file.name
+          });
+
+          hiddenVal.value = res.url;
+          if (preview) {
+            preview.src = res.url;
+            preview.style.display = "block";
+          }
+          showToast("Foto berhasil dikompresi dan terunggah!", "success");
+        } catch (err) {
+          showToast("Gagal mengunggah foto: " + err.message, "error");
+        } finally {
+          if (progress) progress.style.display = "none";
+        }
+      });
+    });
+
+    // Tangani input upload berkas video (MP4) jika ada
+    const videoInput = document.getElementById("inputUploadVideoFile");
+    if (videoInput) {
+      videoInput.addEventListener("change", async () => {
+        if (!videoInput.files || !videoInput.files[0]) return;
+        const file = videoInput.files[0];
+
+        // Validasi ukuran video maksimal 10 MB untuk batas Google Apps Script
+        if (file.size > 10 * 1024 * 1024) {
+          showToast("Ukuran berkas video melebihi 10 MB. Disarankan memakai tautan video YouTube.", "error");
+          videoInput.value = "";
+          return;
+        }
+
+        const vProgress = document.getElementById("videoUploadProgress");
+        if (vProgress) vProgress.style.display = "block";
+
+        try {
+          const reader = new FileReader();
+          reader.onload = async (e) => {
+            const base64Data = e.target.result.split(",")[1];
+            try {
+              const res = await apiCall("admin_uploadVideo", {
+                berkas: {
+                  nama: file.name,
+                  mime: file.type || "video/mp4",
+                  base64: base64Data
+                },
+                judul: file.name
+              });
+
+              document.getElementById("inputVideoUrl").value = res.url;
+              showToast("Berkas video berhasil diunggah ke Google Drive!", "success");
+            } catch (err) {
+              showToast("Gagal mengunggah video: " + err.message, "error");
+            } finally {
+              if (vProgress) vProgress.style.display = "none";
+            }
+          };
+          reader.readAsDataURL(file);
+        } catch (e) {
+          if (vProgress) vProgress.style.display = "none";
+        }
+      });
+    }
+  }
+
+  // Tangani Submit Form Modal Koleksi
+  document.getElementById("formCollectionItem").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const sheetName = AppState.currentModalSheet;
+    if (!sheetName) return;
+
+    const btn = document.getElementById("btnSubmitCollection");
+    const origText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Menyimpan ke Database...";
+
+    const form = e.target;
+    const formData = new FormData(form);
+    const dataObj = {};
+
+    for (let [k, v] of formData.entries()) {
+      dataObj[k] = v;
+    }
+
+    // Tangani penamaan URL khusus Galeri
+    if (sheetName === "Galeri") {
+      const tipe = dataObj.tipe || "foto";
+      dataObj.url = tipe === "foto" ? (dataObj.url_foto || "") : (dataObj.url_video || "");
+      delete dataObj.url_foto;
+      delete dataObj.url_video;
+    }
+
+    // Status Tampil Boolean
+    dataObj.tampil = form.querySelector("input[name='tampil']").checked;
+
+    try {
+      await apiCall("admin_saveRow", {
+        sheetName: sheetName,
+        data: dataObj
+      });
+
+      showToast(`Data ${sheetName} berhasil disimpan!`, "success");
+      AppCollections.closeModal();
+      loadCollection(sheetName);
+    } catch (err) {
+      showToast("Gagal menyimpan: " + err.message, "error");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = origText;
+    }
+  });
 
   // ==========================================
   // 9. PENGGUNA ADMIN & AUDIT LOG

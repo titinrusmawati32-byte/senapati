@@ -35,7 +35,7 @@ function initNavbarScrollEffect() {
 
 function triggerHomyzReveal() {
   const targets = document.querySelectorAll(
-    ".section, .card, .stat-card, .section-header, .steps-grid > *, .hero-badge, .cta-banner, .footer-col"
+    ".section, .card, .pengumuman-card, .stat-card, .section-header, .steps-grid > *, .hero-badge, .cta-banner, .footer-col, .homyz-reveal"
   );
 
   if (!("IntersectionObserver" in window)) {
@@ -460,7 +460,7 @@ function renderPengumumanCards(container, list) {
   container.innerHTML = displayItems
     .map(
       (item) => `
-    <article class="pengumuman-card homyz-reveal">
+    <article class="pengumuman-card is-revealed">
       <div class="pengumuman-thumb-wrap">
         <img src="${escapeHtml(item.bannerUrl)}" 
              alt="${escapeHtml(item.judul)}" 

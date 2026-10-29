@@ -889,6 +889,7 @@ a:hover { color: var(--primary-hover); }
               border-color 0.3s ease;
   position: relative;
   overflow: hidden;
+  opacity: 1 !important;
 }
 
 .pengumuman-card:hover {

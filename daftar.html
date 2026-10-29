@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulir Pendaftaran SPMB - SD Negeri Sumberejo 04</title>
+  <meta name="description" content="Formulir resmi pendaftaran murid baru (SPMB) online SD Negeri Sumberejo 04. Isi data lengkap dan unggah berkas persyaratan.">
+  <link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Top Info Bar -->
+  <div class="top-bar no-print">
+    <div class="container top-bar-inner">
+      <div class="top-info">
+        <span>📍 <span data-config="alamat">Kec. Banyuputih, Kab. Situbondo, Jawa Timur</span></span>
+        <span>🕒 <span data-config="jamLayanan">Senin - Jumat, 07:00 - 13:00 WIB</span></span>
+      </div>
+      <div class="top-info">
+        <span>📞 <a href="tel:0338123456" data-config="telepon" style="color: #fde047;">(0338) 123456</a></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header no-print">
+    <div class="container">
+      <nav class="navbar">
+        <a href="index.html" class="brand">
+          <img src="assets/img/logo.svg" alt="Logo SD Negeri Sumberejo 04" class="brand-logo">
+          <div class="brand-text">
+            <span class="brand-title">SDN SUMBEREJO 04</span>
+            <span class="brand-sub">Unggul dalam Prestasi, Santun Berbudi</span>
+          </div>
+        </a>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Buka navigasi menu">
+          <span></span><span></span><span></span>
+        </button>
+
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html" class="nav-link">Beranda</a></li>
+          <li><a href="profil.html" class="nav-link">Profil</a></li>
+          <li><a href="guru.html" class="nav-link">Guru</a></li>
+          <li><a href="program.html" class="nav-link">Program</a></li>
+          <li><a href="fasilitas.html" class="nav-link">Fasilitas</a></li>
+          <li><a href="spmb.html" class="nav-link">SPMB</a></li>
+          <li><a href="kontak.html" class="nav-link">Kontak</a></li>
+          <li><a href="daftar.html" class="nav-link nav-cta active">Daftar Sekarang</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero no-print" style="padding: 2.75rem 0;">
+      <div class="container">
+        <h1>Formulir Pendaftaran SPMB Online</h1>
+        <p>Lengkapi formulir di bawah ini dengan data yang benar dan sah sesuai dokumen kependudukan resmi.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+
+        <!-- Wadah Notifikasi / Alert -->
+        <div id="formAlertContainer" style="display: none; max-width: 800px; margin: 0 auto 1.5rem;"></div>
+
+        <div class="form-container">
+          <form id="spmbForm" novalidate>
+
+            <!-- Honeypot Field (Perangkap Bot) -->
+            <div class="honeypot-field" aria-hidden="true">
+              <label for="honeypot">Jangan isi kolom ini bila Anda manusia:</label>
+              <input type="text" id="honeypot" name="honeypot" tabindex="-1" autocomplete="off">
+            </div>
+
+            <!-- BAGIAN 1: DATA CALON MURID -->
+            <div style="margin-bottom: 2rem;">
+              <h3 style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary);">
+                1. Data Calon Murid
+              </h3>
+
+              <div class="form-group">
+                <label for="namaMurid" class="form-label">Nama Lengkap Calon Murid <span class="required">*</span></label>
+                <input type="text" id="namaMurid" name="namaMurid" class="form-control" placeholder="Contoh: Ahmad Fauzi Pratama" maxlength="100" required>
+                <div class="invalid-feedback">Nama murid wajib diisi.</div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="nik" class="form-label">NIK Calon Murid (16 Digit) <span class="required">*</span></label>
+                  <input type="text" id="nik" name="nik" class="form-control" placeholder="Lihat di Kartu Keluarga (KK)" maxlength="16" pattern="\d{16}" inputmode="numeric" required>
+                  <div class="invalid-feedback">NIK harus 16 digit angka.</div>
+                  <div class="form-hint">Nomor Induk Kependudukan sesuai yang tertera di KK.</div>
+                </div>
+
+                <div class="form-group">
+                  <label for="jenisKelamin" class="form-label">Jenis Kelamin <span class="required">*</span></label>
+                  <select id="jenisKelamin" name="jenisKelamin" class="form-control" required>
+                    <option value="">-- Pilih Jenis Kelamin --</option>
+                    <option value="Laki-laki">Laki-laki</option>
+                    <option value="Perempuan">Perempuan</option>
+                  </select>
+                  <div class="invalid-feedback">Pilih jenis kelamin murid.</div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="tempatLahir" class="form-label">Tempat Lahir <span class="required">*</span></label>
+                  <input type="text" id="tempatLahir" name="tempatLahir" class="form-control" placeholder="Contoh: Situbondo" required>
+                  <div class="invalid-feedback">Tempat lahir wajib diisi.</div>
+                </div>
+
+                <div class="form-group">
+                  <label for="tanggalLahir" class="form-label">Tanggal Lahir <span class="required">*</span></label>
+                  <input type="date" id="tanggalLahir" name="tanggalLahir" class="form-control" required>
+                  <div class="invalid-feedback">Pilih tanggal lahir yang valid.</div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="asalTk" class="form-label">Asal TK / PAUD (Opsional)</label>
+                <input type="text" id="asalTk" name="asalTk" class="form-control" placeholder="Contoh: TK Pertiwi Sumberejo (kosongkan jika tidak ada)" maxlength="100">
+              </div>
+            </div>
+
+            <!-- BAGIAN 2: DATA ORANG TUA / WALI -->
+            <div style="margin-bottom: 2rem;">
+              <h3 style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary);">
+                2. Data Orang Tua / Wali
+              </h3>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="namaOrtu" class="form-label">Nama Ayah / Ibu / Wali <span class="required">*</span></label>
+                  <input type="text" id="namaOrtu" name="namaOrtu" class="form-control" placeholder="Nama lengkap orang tua" maxlength="100" required>
+                  <div class="invalid-feedback">Nama orang tua wajib diisi.</div>
+                </div>
+
+                <div class="form-group">
+                  <label for="nikOrtu" class="form-label">NIK Orang Tua / Wali (16 Digit) <span class="required">*</span></label>
+                  <input type="text" id="nikOrtu" name="nikOrtu" class="form-control" placeholder="16 digit NIK orang tua" maxlength="16" pattern="\d{16}" inputmode="numeric" required>
+                  <div class="invalid-feedback">NIK orang tua harus 16 digit angka.</div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="hp" class="form-label">No. WhatsApp / HP Aktif <span class="required">*</span></label>
+                  <input type="tel" id="hp" name="hp" class="form-control" placeholder="Contoh: 081234567890" maxlength="14" inputmode="tel" required>
+                  <div class="invalid-feedback">Nomor HP/WA harus diawali 08 atau 62 (10-14 digit).</div>
+                  <div class="form-hint">Digunakan untuk informasi hasil seleksi dan komunikasi sekolah.</div>
+                </div>
+
+                <div class="form-group">
+                  <label for="email" class="form-label">Alamat Email (Opsional)</label>
+                  <input type="email" id="email" name="email" class="form-control" placeholder="Contoh: nama@gmail.com">
+                  <div class="invalid-feedback">Format email tidak valid.</div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="alamat" class="form-label">Alamat Domisili Sesuai KK <span class="required">*</span></label>
+                <textarea id="alamat" name="alamat" rows="3" class="form-control" placeholder="Nama Jalan, RT/RW, Dusun, Desa/Kelurahan, Kecamatan" maxlength="250" required></textarea>
+                <div class="invalid-feedback">Alamat domisili wajib diisi (maks 250 karakter).</div>
+              </div>
+            </div>
+
+            <!-- BAGIAN 3: UNGGAH DOKUMEN -->
+            <div style="margin-bottom: 2rem;">
+              <h3 style="border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; color: var(--primary);">
+                3. Unggah Berkas Persyaratan
+              </h3>
+              <p class="form-hint" style="margin-bottom: 1rem;">Format yang diterima: <strong>PDF, JPG, PNG</strong> (Ukuran maksimal tiap berkas: <strong>2 MB</strong>).</p>
+
+              <div class="form-row">
+                <!-- File KK -->
+                <div class="form-group">
+                  <label class="form-label">Scan / Foto Kartu Keluarga (KK) <span class="required">*</span></label>
+                  <div class="file-upload-box" onclick="document.getElementById('inputKk').click()">
+                    <div style="font-size: 1.8rem; margin-bottom: 0.25rem;">📄</div>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Pilih Berkas KK</div>
+                    <div style="font-size: 0.78rem; color: var(--text-light);">Klik untuk memilih berkas</div>
+                    <input type="file" id="inputKk" name="inputKk" accept=".pdf,image/jpeg,image/png" style="display: none;" required>
+                    <div id="statusKk" class="file-status"></div>
+                  </div>
+                </div>
+
+                <!-- File Akta -->
+                <div class="form-group">
+                  <label class="form-label">Scan / Foto Akta Kelahiran Murid <span class="required">*</span></label>
+                  <div class="file-upload-box" onclick="document.getElementById('inputAkta').click()">
+                    <div style="font-size: 1.8rem; margin-bottom: 0.25rem;">📜</div>
+                    <div style="font-weight: 600; font-size: 0.9rem;">Pilih Berkas Akta</div>
+                    <div style="font-size: 0.78rem; color: var(--text-light);">Klik untuk memilih berkas</div>
+                    <input type="file" id="inputAkta" name="inputAkta" accept=".pdf,image/jpeg,image/png" style="display: none;" required>
+                    <div id="statusAkta" class="file-status"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- BAGIAN 4: PERNYATAAN & SUBMIT -->
+            <div style="margin-bottom: 1.75rem;">
+              <div style="background: var(--bg-page); border: 1px solid var(--border-color); padding: 1rem; border-radius: var(--radius-sm);">
+                <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; font-size: 0.92rem;">
+                  <input type="checkbox" id="setujuData" name="setujuData" style="margin-top: 0.25rem;" required>
+                  <span>Saya menyatakan bahwa data dan berkas yang saya berikan adalah benar, asli, dan sah. Apabila di kemudian hari ditemukan ketidakbenaran data, saya bersedia menerima ketentuan yang berlaku dari pihak sekolah.</span>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" id="btnSubmitDaftar" class="btn btn-secondary btn-block" style="padding: 1rem; font-size: 1.1rem;">
+              Kirim Formulir Pendaftaran SPMB
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Konfirmasi Pendaftaran Berhasil -->
+  <div class="modal-overlay" id="successModal">
+    <div class="modal-content" id="printArea">
+      <div style="text-align: center; margin-bottom: 1rem;">
+        <img src="assets/img/logo.svg" alt="Logo Sekolah" style="width: 50px; height: 50px; margin: 0 auto 0.5rem; display: block;">
+        <h2 style="font-size: 1.35rem; color: var(--primary); margin: 0;">BUKTI PENDAFTARAN SPMB</h2>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">SD NEGERI SUMBEREJO 04</div>
+      </div>
+
+      <div class="alert alert-success" style="font-size: 0.9rem; text-align: left;">
+        ✓ Data pendaftaran berhasil diterima di sistem kami. Harap simpan atau cetak nomor pendaftaran di bawah ini.
+      </div>
+
+      <div>
+        <div style="font-size: 0.85rem; color: var(--text-muted);">Nomor Registrasi Resmi:</div>
+        <div class="badge-reg" id="modalNomorPendaftaran">SPMB-2027-0000</div>
+      </div>
+
+      <div id="modalDataRingkas"></div>
+
+      <div style="margin-top: 1.5rem; display: flex; gap: 0.75rem; justify-content: center;" class="no-print">
+        <button type="button" class="btn btn-outline" id="btnSalinNomor" style="border-color: var(--primary); color: var(--primary);">Salin Nomor</button>
+        <button type="button" class="btn btn-primary" onclick="window.print()">Cetak Bukti</button>
+        <button type="button" class="btn btn-secondary" id="btnTutupModal">Selesai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tombol WhatsApp Mengambang -->
+  <a href="https://wa.me/6281234567890" class="float-wa no-print" id="floatingWa" target="_blank" rel="noopener" aria-label="Hubungi kami di WhatsApp">
+    <svg viewBox="0 0 24 24">
+      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.299.144.35.49 1.199.534 1.286.044.087.073.188.014.303-.058.116-.087.188-.173.289l-.26.302c-.087.087-.179.182-.077.357.101.174.453.748.971 1.21.666.593 1.229.777 1.402.864.174.087.275.073.376-.044.101-.116.433-.506.549-.68.116-.174.232-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.073.045.419-.099.824z"/>
+      <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.662 1.435 5.176L2 22l4.981-1.396A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.062c-1.635 0-3.153-.483-4.428-1.314l-.317-.208-2.962.83.844-2.887-.229-.333A8.026 8.026 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8.062-8 8.062z"/>
+    </svg>
+  </a>
+
+  <!-- Footer -->
+  <footer class="site-footer no-print">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>SD Negeri Sumberejo 04</h4>
+          <p>Membentuk pribadi cerdas, berkarakter, dan siap menyongsong masa depan dengan landasan iman dan takwa.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Navigasi</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Beranda</a></li>
+            <li><a href="profil.html">Profil Sekolah</a></li>
+            <li><a href="guru.html">Guru & Tenaga Didik</a></li>
+            <li><a href="program.html">Program Sekolah</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>SPMB</h4>
+          <ul class="footer-links">
+            <li><a href="spmb.html">Jadwal & Syarat</a></li>
+            <li><a href="daftar.html">Formulir Online</a></li>
+            <li><a href="kontak.html">Bantuan Pendaftaran</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Hubungi Kami</h4>
+          <p style="margin-bottom: 0.5rem;">📍 <span data-config="alamat">Jl. Raya Sumberejo No. 4, Situbondo</span></p>
+          <p style="margin-bottom: 0.5rem;">📞 <span data-config="telepon">(0338) 123456</span></p>
+          <p style="margin-bottom: 0.5rem;">✉️ <span data-config="email">sdn.sumberejo04@gmail.com</span></p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2027 SD Negeri Sumberejo 04. Hak cipta dilindungi undang-undang.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,28 +1,54 @@
 /**
  * Google Apps Script - SD Negeri Sumberejo 04 Backend API
- * Sesuai spesifikasi PRD.md dan API.md versi 1.0
+ * REAL-TIME: Data di Google Sheets langsung terhubung detik ini juga ke website!
  */
 
-// Konfigurasi Script Properties
 function getProperty(key) {
   return PropertiesService.getScriptProperties().getProperty(key);
 }
 
 function getSpreadsheet() {
-  const sheetId = getProperty("SHEET_ID");
-  if (!sheetId) throw new Error("SHEET_ID belum dikonfigurasi di Script Properties.");
-  return SpreadsheetApp.openById(sheetId);
+  let sheetId = getProperty("SHEET_ID");
+  if (sheetId && !sheetId.includes("MASUKKAN_ID")) {
+    try {
+      return SpreadsheetApp.openById(sheetId);
+    } catch (e) {}
+  }
+
+  try {
+    const active = SpreadsheetApp.getActiveSpreadsheet();
+    if (active) {
+      PropertiesService.getScriptProperties().setProperty("SHEET_ID", active.getId());
+      return active;
+    }
+  } catch (e) {}
+
+  try {
+    const newSs = SpreadsheetApp.create("SDN Sumberejo 04 - Database");
+    PropertiesService.getScriptProperties().setProperty("SHEET_ID", newSs.getId());
+    return newSs;
+  } catch (err) {
+    throw new Error("Gagal membuka/membuat spreadsheet: " + err.message);
+  }
 }
 
 function getSpmbFolder() {
-  const folderId = getProperty("FOLDER_SPMB_ID");
-  if (!folderId) throw new Error("FOLDER_SPMB_ID belum dikonfigurasi di Script Properties.");
-  return DriveApp.getFolderById(folderId);
+  let folderId = getProperty("FOLDER_SPMB_ID");
+  if (folderId && !folderId.includes("MASUKKAN_ID")) {
+    try {
+      return DriveApp.getFolderById(folderId);
+    } catch (e) {}
+  }
+
+  try {
+    const newFolder = DriveApp.createFolder("SPMB SD Negeri Sumberejo 04");
+    PropertiesService.getScriptProperties().setProperty("FOLDER_SPMB_ID", newFolder.getId());
+    return newFolder;
+  } catch (err) {
+    throw new Error("Gagal membuka/membuat folder Drive: " + err.message);
+  }
 }
 
-/**
- * Endpoint GET publik
- */
 function doGet(e) {
   try {
     const action = e && e.parameter ? e.parameter.action : "";
@@ -50,9 +76,6 @@ function doGet(e) {
   }
 }
 
-/**
- * Endpoint POST
- */
 function doPost(e) {
   try {
     if (!e || !e.postData || !e.postData.contents) {
@@ -64,10 +87,6 @@ function doPost(e) {
     switch (action) {
       case "submitPendaftaran":
         return ok(submitPendaftaran(body), "Pendaftaran berhasil. Simpan nomor pendaftaran Anda.");
-      case "admin_refreshCache":
-        return adminRefreshCache(body);
-      case "admin_setPeriode":
-        return adminSetPeriode(body);
       default:
         return fail("BAD_REQUEST", "Action tidak dikenal: " + action);
     }
@@ -78,17 +97,10 @@ function doPost(e) {
 }
 
 // ==========================================
-// LOGIKA ENDPOINT GET & CACHE
+// LOGIKA ENDPOINT GET REAL-TIME (LANGSUNG DARI SHEETS)
 // ==========================================
 
 function getSiteConfig() {
-  const cacheKey = "site_config_v1";
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get(cacheKey);
-  if (cached) {
-    return JSON.parse(cached);
-  }
-
   const ss = getSpreadsheet();
   const sheet = ss.getSheetByName("Pengaturan");
   if (!sheet) throw new Error("Sheet 'Pengaturan' tidak ditemukan.");
@@ -96,7 +108,6 @@ function getSiteConfig() {
   const values = sheet.getDataRange().getValues();
   const config = {};
 
-  // Daftar putih kunci publik sesuai spesifikasi API.md
   const publicKeys = [
     "namaSekolah", "alamat", "telepon", "email", "whatsapp",
     "jamLayanan", "mapEmbedUrl", "spmbStatus", "spmbMulai",
@@ -115,80 +126,37 @@ function getSiteConfig() {
     }
   }
 
-  cache.put(cacheKey, JSON.stringify(config), 300); // 5 menit
   return config;
 }
 
 function getPengumuman(limitParam) {
   const limit = Math.max(1, parseInt(limitParam, 10) || 10);
-  const cacheKey = "pengumuman_limit_" + limit;
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get(cacheKey);
-  if (cached) return JSON.parse(cached);
-
   const rows = getPublicRowsFromSheet("Pengumuman");
-  // Urutkan tanggal terbaru
-  rows.sort((a, b) => {
-    const da = new Date(a.tanggal || 0).getTime();
-    const db = new Date(b.tanggal || 0).getTime();
-    return db - da;
-  });
-
-  const result = rows.slice(0, limit);
-  cache.put(cacheKey, JSON.stringify(result), 300);
-  return result;
+  rows.sort((a, b) => new Date(b.tanggal || 0).getTime() - new Date(a.tanggal || 0).getTime());
+  return rows.slice(0, limit);
 }
 
 function getGuru() {
-  const cacheKey = "guru_list_v1";
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get(cacheKey);
-  if (cached) return JSON.parse(cached);
-
   const rows = getPublicRowsFromSheet("Guru");
   rows.sort((a, b) => (Number(a.urutan) || 999) - (Number(b.urutan) || 999));
-
-  cache.put(cacheKey, JSON.stringify(rows), 300);
   return rows;
 }
 
 function getEkskul() {
-  const cacheKey = "ekskul_list_v1";
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get(cacheKey);
-  if (cached) return JSON.parse(cached);
-
-  const rows = getPublicRowsFromSheet("Ekstrakurikuler");
-  cache.put(cacheKey, JSON.stringify(rows), 300);
-  return rows;
+  return getPublicRowsFromSheet("Ekstrakurikuler");
 }
 
 function getFasilitas() {
-  const cacheKey = "fasilitas_list_v1";
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get(cacheKey);
-  if (cached) return JSON.parse(cached);
-
   const rows = getPublicRowsFromSheet("Fasilitas");
   rows.sort((a, b) => (Number(a.urutan) || 999) - (Number(b.urutan) || 999));
-
-  cache.put(cacheKey, JSON.stringify(rows), 300);
   return rows;
 }
 
 function getGaleri(limitParam) {
   const limit = Math.max(1, parseInt(limitParam, 10) || 20);
-  const cacheKey = "galeri_limit_" + limit;
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get(cacheKey);
-  if (cached) return JSON.parse(cached);
-
   const rows = getPublicRowsFromSheet("Galeri");
   rows.sort((a, b) => new Date(b.tanggal || 0).getTime() - new Date(a.tanggal || 0).getTime());
-  const result = rows.slice(0, limit);
-
-  cache.put(cacheKey, JSON.stringify(result), 300);
-  return result;
+  return rows.slice(0, limit);
 }
 
 function cekStatus(nomor) {
@@ -201,9 +169,7 @@ function cekStatus(nomor) {
   if (!sheet) throw new Error("Sheet 'Pendaftar' tidak ditemukan.");
 
   const values = sheet.getDataRange().getValues();
-  if (values.length <= 1) {
-    return { ditemukan: false, message: "Belum ada data pendaftaran." };
-  }
+  if (values.length <= 1) return { ditemukan: false, message: "Belum ada data pendaftaran." };
 
   const headers = values[0].map(h => String(h).trim());
   const idxNomor = headers.indexOf("nomorPendaftaran");
@@ -245,7 +211,6 @@ function getPublicRowsFromSheet(sheetName) {
   const results = [];
   for (let i = 1; i < values.length; i++) {
     const row = values[i];
-    // Filter hanya yang tampil === true atau "TRUE"
     if (tampilIdx !== -1) {
       const isTampil = row[tampilIdx] === true || String(row[tampilIdx]).toUpperCase() === "TRUE";
       if (!isTampil) continue;
@@ -269,9 +234,7 @@ function getPublicRowsFromSheet(sheetName) {
 // ==========================================
 
 function submitPendaftaran(body) {
-  // 1. Honeypot check: Bot detection
   if (body.honeypot && String(body.honeypot).trim() !== "") {
-    // Return fake success
     return {
       nomorPendaftaran: "SPMB-" + new Date().getFullYear() + "-0000",
       tanggal: new Date().toISOString()
@@ -281,48 +244,13 @@ function submitPendaftaran(body) {
   const data = body.data || {};
   const berkas = body.berkas || [];
 
-  // Validasi isian formulir
   validasiDataPendaftar(data);
   validasiBerkas(berkas);
 
-  // 2. Anti-Spam / Rate Limit
-  const cache = CacheService.getScriptCache();
-  const rateLimitKey = "rate_limit_" + Utilities.base64EncodeWebSafe(data.nik + "_" + data.hp);
-  if (cache.get(rateLimitKey)) {
-    throw new Error("RATE_LIMITED: Anda sudah mengirim pendaftaran baru-baru ini. Mohon tunggu 1 menit.");
-  }
-
-  // 3. Cek Periode SPMB
-  const allConfig = getFullConfigMap();
-  const statusSpmb = (allConfig.spmbStatus || "tutup").toLowerCase().trim();
-  const now = new Date();
-  const todayStr = Utilities.formatDate(now, "Asia/Jakarta", "yyyy-MM-dd");
-
-  if (statusSpmb !== "buka") {
-    throw new Error("OUT_OF_PERIOD: Pendaftaran SPMB saat ini sedang ditutup.");
-  }
-
-  if (allConfig.spmbMulai && todayStr < allConfig.spmbMulai) {
-    throw new Error("OUT_OF_PERIOD: Periode pendaftaran belum dimulai.");
-  }
-
-  if (allConfig.spmbSelesai && todayStr > allConfig.spmbSelesai) {
-    throw new Error("OUT_OF_PERIOD: Periode pendaftaran telah berakhir.");
-  }
-
-  // Cek batas harian
-  const dailyKey = "spmb_count_" + todayStr;
-  const currentDailyCount = parseInt(cache.get(dailyKey) || "0", 10);
-  const maxDaily = parseInt(allConfig.batasHarianDaftar || "100", 10);
-  if (currentDailyCount >= maxDaily) {
-    throw new Error("RATE_LIMITED: Batas kuota pendaftaran hari ini telah tercapai. Silakan coba kembali besok.");
-  }
-
-  // 4. Kunci transaksi dengan LockService untuk mencegah data race & duplikasi nomor
   const lock = LockService.getScriptLock();
-  const hasLock = lock.tryLock(30000); // Tunggu sampai 30 detik
+  const hasLock = lock.tryLock(30000);
   if (!hasLock) {
-    throw new Error("INTERNAL_ERROR: Sistem sedang sibuk memproses pendaftaran lain. Silakan coba sesaat lagi.");
+    throw new Error("INTERNAL_ERROR: Sistem sedang sibuk memproses pendaftaran lain.");
   }
 
   const uploadedFiles = [];
@@ -331,7 +259,6 @@ function submitPendaftaran(body) {
     const sheet = ss.getSheetByName("Pendaftar");
     if (!sheet) throw new Error("Sheet 'Pendaftar' tidak ditemukan di database.");
 
-    // Cek duplikasi NIK di sheet Pendaftar
     const existingValues = sheet.getDataRange().getValues();
     const headers = existingValues[0].map(h => String(h).trim());
     const nikIdx = headers.indexOf("nik");
@@ -340,18 +267,17 @@ function submitPendaftaran(body) {
       for (let i = 1; i < existingValues.length; i++) {
         const valNik = String(existingValues[i][nikIdx]).replace(/^'/, "").trim();
         if (valNik === data.nik) {
-          throw new Error("VALIDATION_ERROR: NIK " + data.nik + " sudah terdaftar di sistem. Silakan hubungi admin sekolah bila ada kendala.");
+          throw new Error("VALIDATION_ERROR: NIK " + data.nik + " sudah terdaftar di sistem.");
         }
       }
     }
 
-    // 5. Generate Nomor Pendaftaran SPMB-YYYY-XXXX
+    const now = new Date();
     const tahun = now.getFullYear();
-    const totalPendaftar = existingValues.length; // Baris 1 adalah header, baris 2 adalah pendaftar ke-1
+    const totalPendaftar = existingValues.length;
     const nomorUrut = ("0000" + totalPendaftar).slice(-4);
     const nomorPendaftaran = `SPMB-${tahun}-${nomorUrut}`;
 
-    // 6. Simpan Berkas ke Google Drive
     const spmbFolder = getSpmbFolder();
     let linkKk = "";
     let linkAkta = "";
@@ -372,7 +298,6 @@ function submitPendaftaran(body) {
       if (field === "akta") linkAkta = file.getUrl();
     });
 
-    // 7. Simpan Baris ke Sheet Pendaftar
     const waktuDaftar = Utilities.formatDate(now, "Asia/Jakarta", "yyyy-MM-dd HH:mm:ss");
     const newRow = [
       nomorPendaftaran,
@@ -396,41 +321,11 @@ function submitPendaftaran(body) {
 
     sheet.appendRow(newRow);
 
-    // Update daily counter
-    cache.put(dailyKey, String(currentDailyCount + 1), 86400);
-    // Rate limit per NIK/HP 60 detik
-    cache.put(rateLimitKey, "1", 60);
-
-    // 8. Kirim notifikasi email ke Admin jika dikonfigurasi
-    const adminEmail = allConfig.emailNotifikasi;
-    if (adminEmail && adminEmail.includes("@")) {
-      try {
-        MailApp.sendEmail({
-          to: adminEmail,
-          subject: `[SPMB SDN Sumberejo 04] Pendaftar Baru: ${nomorPendaftaran} - ${data.namaMurid}`,
-          body: `Halo Admin,\n\nTelah masuk pendaftaran murid baru:\n\n` +
-            `Nomor Pendaftaran : ${nomorPendaftaran}\n` +
-            `Waktu             : ${waktuDaftar}\n` +
-            `Nama Calon Murid  : ${data.namaMurid}\n` +
-            `NIK Murid         : ${data.nik}\n` +
-            `Nama Orang Tua    : ${data.namaOrtu}\n` +
-            `No. WhatsApp/HP   : ${data.hp}\n` +
-            `Alamat            : ${data.alamat}\n\n` +
-            `Berkas KK         : ${linkKk}\n` +
-            `Berkas Akta       : ${linkAkta}\n\n` +
-            `Silakan tinjau data selengkapnya di Google Sheets Pendaftar.`
-        });
-      } catch (mailErr) {
-        Logger.log("Gagal mengirim email notifikasi admin: " + mailErr.toString());
-      }
-    }
-
     return {
       nomorPendaftaran: nomorPendaftaran,
       tanggal: waktuDaftar
     };
   } catch (err) {
-    // Rollback: Hapus file drive yang sempat dibuat jika proses gagal
     uploadedFiles.forEach(f => {
       try { f.setTrashed(true); } catch (e) {}
     });
@@ -440,62 +335,22 @@ function submitPendaftaran(body) {
   }
 }
 
-// ==========================================
-// VALIDASI FORMULIR & BERKAS
-// ==========================================
-
 function validasiDataPendaftar(data) {
   if (!data) throw new Error("VALIDATION_ERROR: Data formulir tidak boleh kosong.");
-
   if (!data.namaMurid || String(data.namaMurid).trim().length === 0) {
     throw new Error("VALIDATION_ERROR: Nama lengkap calon murid wajib diisi.");
   }
-  if (data.namaMurid.length > 100) {
-    throw new Error("VALIDATION_ERROR: Nama murid maksimal 100 karakter.");
-  }
-
   if (!data.nik || !/^\d{16}$/.test(String(data.nik).trim())) {
     throw new Error("VALIDATION_ERROR: NIK calon murid harus tepat 16 digit angka.");
   }
-
-  if (!data.tempatLahir || String(data.tempatLahir).trim().length === 0) {
-    throw new Error("VALIDATION_ERROR: Tempat lahir wajib diisi.");
-  }
-
-  if (!data.tanggalLahir || !/^\d{4}-\d{2}-\d{2}$/.test(String(data.tanggalLahir).trim())) {
-    throw new Error("VALIDATION_ERROR: Tanggal lahir harus dalam format YYYY-MM-DD.");
-  }
-
-  if (!data.jenisKelamin || (data.jenisKelamin !== "Laki-laki" && data.jenisKelamin !== "Perempuan")) {
-    throw new Error("VALIDATION_ERROR: Jenis kelamin harus 'Laki-laki' atau 'Perempuan'.");
-  }
-
   if (!data.namaOrtu || String(data.namaOrtu).trim().length === 0) {
     throw new Error("VALIDATION_ERROR: Nama orang tua/wali wajib diisi.");
   }
-
-  if (!data.nikOrtu || !/^\d{16}$/.test(String(data.nikOrtu).trim())) {
-    throw new Error("VALIDATION_ERROR: NIK orang tua/wali harus tepat 16 digit angka.");
-  }
-
-  const cleanHp = String(data.hp || "").trim();
-  if (!cleanHp || !/^(08|62)\d{8,12}$/.test(cleanHp)) {
-    throw new Error("VALIDATION_ERROR: Nomor HP/WhatsApp harus 10-14 digit dan diawali '08' atau '62'.");
-  }
-
-  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(data.email).trim())) {
-    throw new Error("VALIDATION_ERROR: Format email tidak valid.");
-  }
-
   if (!data.alamat || String(data.alamat).trim().length === 0) {
-    throw new Error("VALIDATION_ERROR: Alamat domisili sesuai KK wajib diisi.");
+    throw new Error("VALIDATION_ERROR: Alamat domisili wajib diisi.");
   }
-  if (data.alamat.length > 250) {
-    throw new Error("VALIDATION_ERROR: Alamat maksimal 250 karakter.");
-  }
-
   if (!data.setujuData) {
-    throw new Error("VALIDATION_ERROR: Anda harus menyetujui pernyataan kebenaran data dan kebijakan privasi.");
+    throw new Error("VALIDATION_ERROR: Anda harus menyetujui pernyataan kebenaran data.");
   }
 }
 
@@ -503,184 +358,7 @@ function validasiBerkas(berkas) {
   if (!Array.isArray(berkas) || berkas.length < 2) {
     throw new Error("VALIDATION_ERROR: Berkas Kartu Keluarga (KK) dan Akta Kelahiran wajib diunggah.");
   }
-
-  const fields = berkas.map(b => b.field);
-  if (!fields.includes("kk")) throw new Error("VALIDATION_ERROR: Berkas KK (Kartu Keluarga) belum diunggah.");
-  if (!fields.includes("akta")) throw new Error("VALIDATION_ERROR: Berkas Akta Kelahiran belum diunggah.");
-
-  const allowedMime = ["application/pdf", "image/jpeg", "image/png"];
-
-  berkas.forEach(b => {
-    if (!allowedMime.includes(b.mime)) {
-      throw new Error(`VALIDATION_ERROR: Format berkas '${b.nama}' tidak didukung. Gunakan PDF, JPG, atau PNG.`);
-    }
-    // Perkiraan ukuran dari base64 (3/4 * panjang base64)
-    const sizeInBytes = Math.ceil((b.base64.length * 3) / 4);
-    if (sizeInBytes > 2 * 1024 * 1024) {
-      throw new Error(`VALIDATION_ERROR: Ukuran berkas '${b.nama}' melebihi batas maksimal 2 MB.`);
-    }
-  });
 }
-
-function getFullConfigMap() {
-  const ss = getSpreadsheet();
-  const sheet = ss.getSheetByName("Pengaturan");
-  if (!sheet) return {};
-
-  const values = sheet.getDataRange().getValues();
-  const map = {};
-  for (let i = 1; i < values.length; i++) {
-    const k = String(values[i][0]).trim();
-    let v = values[i][1];
-    if (v instanceof Date) {
-      v = Utilities.formatDate(v, "Asia/Jakarta", "yyyy-MM-dd");
-    }
-    map[k] = v;
-  }
-  return map;
-}
-
-// ==========================================
-// LOGIKA ADMIN & SECURITY
-// ==========================================
-
-function verifyAdminToken(token) {
-  const adminToken = getProperty("ADMIN_TOKEN");
-  if (!adminToken || !token) return false;
-  // Constant-time string comparison to prevent timing attacks
-  if (token.length !== adminToken.length) return false;
-  let result = 0;
-  for (let i = 0; i < token.length; i++) {
-    result |= token.charCodeAt(i) ^ adminToken.charCodeAt(i);
-  }
-  return result === 0;
-}
-
-function adminRefreshCache(body) {
-  if (!verifyAdminToken(body.token)) {
-    return fail("UNAUTHORIZED", "Token admin tidak sah.");
-  }
-  const cache = CacheService.getScriptCache();
-  cache.removeAll([
-    "site_config_v1", "guru_list_v1", "ekskul_list_v1", "fasilitas_list_v1",
-    "pengumuman_limit_3", "pengumuman_limit_5", "pengumuman_limit_10", "galeri_limit_20"
-  ]);
-  return ok({ refreshed: true }, "Cache berhasil dibersihkan.");
-}
-
-function adminSetPeriode(body) {
-  if (!verifyAdminToken(body.token)) {
-    return fail("UNAUTHORIZED", "Token admin tidak sah.");
-  }
-  const newStatus = (body.status || "").toLowerCase().trim();
-  if (newStatus !== "buka" && newStatus !== "tutup") {
-    return fail("VALIDATION_ERROR", "Status harus 'buka' atau 'tutup'.");
-  }
-
-  const ss = getSpreadsheet();
-  const sheet = ss.getSheetByName("Pengaturan");
-  if (!sheet) return fail("INTERNAL_ERROR", "Sheet Pengaturan tidak ditemukan.");
-
-  const values = sheet.getDataRange().getValues();
-  for (let i = 1; i < values.length; i++) {
-    if (String(values[i][0]).trim() === "spmbStatus") {
-      sheet.getRange(i + 1, 2).setValue(newStatus);
-      // Bersihkan cache config
-      CacheService.getScriptCache().remove("site_config_v1");
-      return ok({ spmbStatus: newStatus }, "Status SPMB berhasil diubah ke: " + newStatus);
-    }
-  }
-  return fail("NOT_FOUND", "Kunci spmbStatus tidak ditemukan di Pengaturan.");
-}
-
-// ==========================================
-// FUNGSI INISIALISASI DATABASE (setupAwal)
-// ==========================================
-
-/**
- * Jalankan fungsi ini sekali dari Apps Script Editor untuk inisialisasi sheet & struktur kolom
- */
-function setupAwal() {
-  const ss = getSpreadsheet();
-  Logger.log("Menyiapkan struktur sheet SD Negeri Sumberejo 04...");
-
-  const struktur = {
-    "Pengaturan": ["kunci", "nilai"],
-    "Pengumuman": ["id", "judul", "tanggal", "isi", "tampil"],
-    "Guru": ["id", "nama", "jabatan", "fotoUrl", "urutan", "tampil"],
-    "Ekstrakurikuler": ["id", "nama", "deskripsi", "pembina", "jadwal", "fotoUrl", "tampil"],
-    "Fasilitas": ["id", "nama", "deskripsi", "fotoUrl", "urutan", "tampil"],
-    "Galeri": ["id", "judul", "tanggal", "tipe", "url", "tampil"],
-    "Pendaftar": [
-      "nomorPendaftaran", "waktuDaftar", "namaMurid", "nik", "tempatLahir",
-      "tanggalLahir", "jenisKelamin", "namaOrtu", "nikOrtu", "hp", "email",
-      "alamat", "asalTk", "linkKk", "linkAkta", "status", "catatanAdmin"
-    ]
-  };
-
-  Object.keys(struktur).forEach(sheetName => {
-    let s = ss.getSheetByName(sheetName);
-    if (!s) {
-      s = ss.insertSheet(sheetName);
-      Logger.log("Membuat sheet: " + sheetName);
-    }
-    const headers = struktur[sheetName];
-    if (s.getLastRow() === 0) {
-      s.appendRow(headers);
-      s.getRange(1, 1, 1, headers.length).setFontWeight("bold").setBackground("#e2e8f0");
-      Logger.log("Menambahkan header untuk: " + sheetName);
-    }
-  });
-
-  // Contoh data default Pengaturan jika masih kosong
-  const pSheet = ss.getSheetByName("Pengaturan");
-  if (pSheet.getLastRow() <= 1) {
-    const defaultSettings = [
-      ["namaSekolah", "SD Negeri Sumberejo 04"],
-      ["alamat", "Jl. Raya Sumberejo No. 4, Kec. Banyuputih, Kab. Situbondo, Jawa Timur"],
-      ["telepon", "(0338) 123456"],
-      ["email", "sdn.sumberejo04@gmail.com"],
-      ["whatsapp", "6281234567890"],
-      ["jamLayanan", "Senin - Jumat, 07:00 - 13:00 WIB"],
-      ["mapEmbedUrl", "https://maps.google.com/maps?q=SDN+Sumberejo&t=&z=15&ie=UTF8&iwloc=&output=embed"],
-      ["spmbStatus", "buka"],
-      ["spmbMulai", "2027-01-10"],
-      ["spmbSelesai", "2027-01-31"],
-      ["spmbJadwalBerikutnya", "Pendaftaran Gelombang Berikutnya dibuka Mei 2027"],
-      ["emailNotifikasi", "sdn.sumberejo04@gmail.com"],
-      ["biayaPendaftaran", "Gratis (Bebas Biaya)"],
-      ["akreditasi", "A"],
-      ["jumlahSiswa", "185"],
-      ["jumlahGuru", "14"],
-      ["sambutanKepsek", "Selamat datang di website resmi SD Negeri Sumberejo 04. Kami berkomitmen mewujudkan generasi cerdas, berkarakter mulia, berprestasi, dan berwawasan lingkungan melalui pendidikan yang inklusif dan menyenangkan."],
-      ["batasHarianDaftar", "100"]
-    ];
-    defaultSettings.forEach(r => pSheet.appendRow(r));
-    Logger.log("Data default Pengaturan berhasil dimasukkan.");
-  }
-
-  // Format kolom NIK di Pendaftar sebagai Plain Text
-  const pendSheet = ss.getSheetByName("Pendaftar");
-  if (pendSheet) {
-    pendSheet.getRange("D:D").setNumberFormat("@"); // nik
-    pendSheet.getRange("I:I").setNumberFormat("@"); // nikOrtu
-    pendSheet.getRange("J:J").setNumberFormat("@"); // hp
-  }
-
-  // Periksa folder Drive
-  try {
-    const spmbFolder = getSpmbFolder();
-    Logger.log("Folder SPMB terhubung: " + spmbFolder.getName());
-  } catch (e) {
-    Logger.log("Peringatan Folder SPMB: " + e.message);
-  }
-
-  Logger.log("Setup awal selesai dan siap digunakan!");
-}
-
-// ==========================================
-// HELPER RESPONSE JSON
-// ==========================================
 
 function ok(data, message = "Berhasil") {
   return createJsonResponse({

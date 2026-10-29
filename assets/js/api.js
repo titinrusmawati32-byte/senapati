@@ -1,7 +1,6 @@
 /**
  * Klien API Frontend SD Negeri Sumberejo 04
- * Menghubungkan antarmuka web dengan Google Apps Script Web App
- * Sesuai spesifikasi API.md
+ * Menghubungkan antarmuka web dengan Google Apps Script Web App secara REAL-TIME
  */
 
 (function () {
@@ -10,7 +9,7 @@
   };
 
   /**
-   * Panggilan HTTP GET publik
+   * Panggilan HTTP GET publik secara REAL-TIME tanpa cache browser
    * @param {string} action Nama endpoint aksi
    * @param {object} params Parameter query tambahan
    * @returns {Promise<any>}
@@ -18,17 +17,19 @@
   async function apiGet(action, params = {}) {
     const url = getApiUrl();
     if (!url || url.includes("SAMPLE_DEPLOYMENT_ID")) {
-      console.warn(`[API] API_URL belum dikonfigurasi di assets/js/config.js. Menjalankan fallback tampilan lokal.`);
+      console.warn(`[API] API_URL belum dikonfigurasi. Menggunakan tampilan bawaan.`);
       return null;
     }
 
     try {
-      const qs = new URLSearchParams({ action, ...params });
+      // Tambahkan timestamp (_t) dan no-store agar data SELALU langsung diambil dari Google Sheets
+      const qs = new URLSearchParams({ action, ...params, _t: Date.now() });
       const res = await fetch(`${url}?${qs.toString()}`, {
         method: "GET",
         headers: {
           "Accept": "application/json"
-        }
+        },
+        cache: "no-store"
       });
 
       if (!res.ok) {
@@ -47,7 +48,7 @@
   }
 
   /**
-   * Panggilan HTTP POST (pendaftaran & admin)
+   * Panggilan HTTP POST (pendaftaran & formulir)
    * Menggunakan Content-Type text/plain;charset=utf-8 untuk menghindari CORS preflight
    * @param {object} payload Payload data JSON
    * @returns {Promise<any>}
@@ -55,7 +56,7 @@
   async function apiPost(payload) {
     const url = getApiUrl();
     if (!url || url.includes("SAMPLE_DEPLOYMENT_ID")) {
-      throw new Error("URL API belum dikonfigurasi di assets/js/config.js. Silakan lengkapi URL deployment Google Apps Script Anda terlebih dahulu.");
+      throw new Error("URL API belum dikonfigurasi.");
     }
 
     try {

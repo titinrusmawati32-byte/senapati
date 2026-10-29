@@ -1,8 +1,7 @@
 /**
  * Konfigurasi Aplikasi Frontend SD Negeri Sumberejo 04
- * Ganti URL di bawah dengan Web App URL hasil deployment Google Apps Script Anda.
- * Berkas ini aman dipublikasikan ke GitHub Pages karena URL Web App bukan rahasia.
+ * Terhubung langsung dengan Google Apps Script Web App
  */
 window.APP_CONFIG = {
-  API_URL: "https://script.google.com/macros/s/AKfycbz_SAMPLE_DEPLOYMENT_ID/exec"
+  API_URL: "https://script.google.com/macros/s/AKfycbycxG7Ctmdj_6x8CQJRlXBqr302UEgZ8JQ5f4qI52AlJBWI9W2YtYocEK7Z2_ZyIhhj3w/exec"
 };

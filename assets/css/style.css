@@ -859,3 +859,221 @@ a:hover { color: var(--primary-hover); }
     display: none !important;
   }
 }
+
+/* ==========================================================================
+   HOMYZ-STYLE MODERN TRANSITIONS & ANIMATIONS
+   Inspirasi: Framer-Motion Real-Estate Landing Page (Smooth Ease, Spring, Glassmorphism, Floating Cards)
+   ========================================================================== */
+
+/* 1. Keyframes Animasi */
+@keyframes homyzFadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes homyzScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes homyzPulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 16px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
+}
+
+@keyframes homyzShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 2. Glassmorphism Sticky Header saat Scroll */
+.site-header {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.site-header.scrolled {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.12);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.site-header.scrolled .navbar {
+  padding: 0.45rem 0;
+  transition: padding 0.3s ease;
+}
+
+/* 3. Hero Entry Animations (Staggered Homyz Entrance) */
+.hero {
+  background: radial-gradient(circle at 85% 20%, rgba(234, 179, 8, 0.18) 0%, transparent 45%),
+              linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+}
+
+.hero .hero-badge {
+  opacity: 0;
+  animation: homyzFadeUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+}
+
+.hero h1 {
+  opacity: 0;
+  animation: homyzFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
+}
+
+.hero p {
+  opacity: 0;
+  animation: homyzFadeUp 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+}
+
+.hero .hero-actions {
+  opacity: 0;
+  animation: homyzFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.55s forwards;
+}
+
+/* 4. Scroll Reveal Transition (Framer-Motion Style) */
+.homyz-reveal {
+  opacity: 0;
+  transform: translateY(35px);
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.homyz-reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger delay untuk elemen dalam grid */
+.card-grid .homyz-reveal.is-revealed:nth-child(1),
+.stats-grid .homyz-reveal.is-revealed:nth-child(1) { transition-delay: 0.05s; }
+.card-grid .homyz-reveal.is-revealed:nth-child(2),
+.stats-grid .homyz-reveal.is-revealed:nth-child(2) { transition-delay: 0.15s; }
+.card-grid .homyz-reveal.is-revealed:nth-child(3),
+.stats-grid .homyz-reveal.is-revealed:nth-child(3) { transition-delay: 0.25s; }
+.card-grid .homyz-reveal.is-revealed:nth-child(4),
+.stats-grid .homyz-reveal.is-revealed:nth-child(4) { transition-delay: 0.35s; }
+.card-grid .homyz-reveal.is-revealed:nth-child(5) { transition-delay: 0.45s; }
+.card-grid .homyz-reveal.is-revealed:nth-child(6) { transition-delay: 0.55s; }
+
+/* 5. Stat Card Homyz Elevated Styling */
+.stat-card {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 30px -10px rgba(30, 58, 138, 0.18), 0 10px 15px -5px rgba(0, 0, 0, 0.06);
+}
+
+/* 6. Card Hover Transition (Homyz Floating Elevation & Zoom) */
+.card {
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.015);
+  box-shadow: 0 22px 35px -10px rgba(30, 58, 138, 0.16),
+              0 10px 20px -5px rgba(0, 0, 0, 0.04);
+  border-color: rgba(30, 58, 138, 0.25);
+}
+
+.card-img {
+  overflow: hidden;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card:hover .card-img,
+.card:hover img.card-img {
+  transform: scale(1.06);
+}
+
+/* 7. Button Interactive Physics & Sheen */
+.btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.25s ease;
+  will-change: transform;
+}
+
+.btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 20px -5px rgba(30, 58, 138, 0.25);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn-secondary:hover {
+  box-shadow: 0 10px 20px -5px rgba(234, 179, 8, 0.45);
+}
+
+/* Shimmer sweep effect on buttons */
+.btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  transform: translateX(-100%);
+}
+
+.btn:hover::after {
+  animation: homyzShimmer 0.75s ease;
+}
+
+/* 8. Floating WA Button Pulse Glow */
+.float-wa {
+  animation: homyzPulseGlow 2.5s infinite;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.float-wa:hover {
+  transform: scale(1.12) rotate(6deg);
+}
+
+/* 9. Section Title Golden Underline Expansion */
+.section-title::after {
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.homyz-reveal .section-title::after {
+  width: 0;
+}
+
+.homyz-reveal.is-revealed .section-title::after {
+  width: 65px;
+}

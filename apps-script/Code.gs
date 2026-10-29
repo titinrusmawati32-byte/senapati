@@ -389,6 +389,7 @@ function adminUpdatePendaftar(nomor, status, catatan, session) {
       if (catIdx !== -1) {
         sheet.getRange(i + 1, catIdx + 1).setValue(catatan || "");
       }
+      SpreadsheetApp.flush();
       logActivity(session.namaPengguna, "VERIFIKASI_SPMB", "Pendaftar", `Ubah status ${nomor} ke: ${status}`);
       return { success: true };
     }

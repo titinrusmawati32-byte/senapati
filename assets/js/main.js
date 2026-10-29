@@ -6,11 +6,123 @@
 document.addEventListener("DOMContentLoaded", () => {
   initNavigation();
   initGlobalData();
+  initHomyzTransitions();
   initPageSpecific();
 });
 
 // ==========================================
-// 1. NAVIGASI & MENU MOBILE
+// 1. TRANSISI & ANIMASI MODERN (GAYA HOMYZ / FRAMER MOTION)
+// ==========================================
+function initHomyzTransitions() {
+  initNavbarScrollEffect();
+  triggerHomyzReveal();
+  initAnimatedCounters();
+}
+
+function initNavbarScrollEffect() {
+  const header = document.querySelector(".site-header");
+  if (!header) return;
+  const handleScroll = () => {
+    if (window.scrollY > 30) {
+      header.classList.add("scrolled");
+    } else {
+      header.classList.remove("scrolled");
+    }
+  };
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  handleScroll();
+}
+
+function triggerHomyzReveal() {
+  const targets = document.querySelectorAll(
+    ".section, .card, .stat-card, .section-header, .steps-grid > *, .hero-badge, .cta-banner, .footer-col"
+  );
+
+  if (!("IntersectionObserver" in window)) {
+    targets.forEach((el) => el.classList.add("is-revealed"));
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-revealed");
+          obs.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: "0px 0px -30px 0px"
+    }
+  );
+
+  targets.forEach((el) => {
+    if (!el.classList.contains("homyz-reveal")) {
+      el.classList.add("homyz-reveal");
+    }
+    observer.observe(el);
+  });
+}
+window.triggerHomyzReveal = triggerHomyzReveal;
+
+function initAnimatedCounters() {
+  const statNumbers = document.querySelectorAll(".stat-number");
+  if (statNumbers.length === 0) return;
+
+  const animateNumber = (el, targetStr) => {
+    // Abaikan jika bukan angka (misal Akreditasi "A")
+    const numericMatch = targetStr.match(/\d+/);
+    if (!numericMatch) return;
+
+    const numericVal = parseInt(numericMatch[0], 10);
+    const isPercent = targetStr.includes("%");
+    const isPlus = targetStr.includes("+");
+
+    const duration = 1500; // 1.5 detik
+    const startTime = performance.now();
+
+    const updateCounter = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease Out Cubic
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const currentVal = Math.floor(easeProgress * numericVal);
+
+      el.textContent = `${currentVal}${isPlus ? "+" : ""}${isPercent ? "%" : ""}`;
+
+      if (progress < 1) {
+        requestAnimationFrame(updateCounter);
+      } else {
+        el.textContent = targetStr;
+      }
+    };
+
+    requestAnimationFrame(updateCounter);
+  };
+
+  if (!("IntersectionObserver" in window)) return;
+
+  const observer = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          const targetText = el.textContent.trim();
+          animateNumber(el, targetText);
+          obs.unobserve(el);
+        }
+      });
+    },
+    { threshold: 0.4 }
+  );
+
+  statNumbers.forEach((el) => observer.observe(el));
+}
+
+// ==========================================
+// 2. NAVIGASI & MENU MOBILE
 // ==========================================
 function initNavigation() {
   const toggleBtn = document.getElementById("navToggle");
@@ -161,6 +273,7 @@ async function initHomePage() {
       `
         )
         .join("");
+      triggerHomyzReveal();
     }
   } catch (e) {
     // Biarkan pengumuman bawaan HTML tetap tampil
@@ -194,6 +307,7 @@ async function initGuruPage() {
         `;
         })
         .join("");
+      triggerHomyzReveal();
     }
   } catch (e) {
     console.warn("Gagal memuat guru dari API, mempertahankan konten default.");
@@ -226,6 +340,7 @@ async function initProgramPage() {
       `
         )
         .join("");
+      triggerHomyzReveal();
     }
   } catch (e) {
     console.warn("Gagal memuat ekskul dari API.");
@@ -259,6 +374,7 @@ async function initFasilitasPage() {
         `;
         })
         .join("");
+      triggerHomyzReveal();
     }
   } catch (e) {
     console.warn("Gagal memuat fasilitas dari API.");

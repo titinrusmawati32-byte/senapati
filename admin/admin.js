@@ -387,6 +387,16 @@
 
       try {
         await apiCall("admin_saveKonten", { items: items });
+        // Simpan langsung ke cache lokal browser agar website seketika ter-update dalam 0 milidetik
+        try {
+          const currentConfig = JSON.parse(localStorage.getItem("sdn_site_config") || "{}");
+          items.forEach((it) => {
+            currentConfig[it.kunci] = it.nilai;
+            if (AppState.siteConfig) AppState.siteConfig[it.kunci] = it.nilai;
+          });
+          localStorage.setItem("sdn_site_config", JSON.stringify(currentConfig));
+        } catch (e) {}
+
         showToast(`${modulTitle} berhasil disimpan dan langsung diperbarui di web!`, "success");
       } catch (err) {
         showToast(`Gagal menyimpan ${modulTitle}: ` + err.message, "error");

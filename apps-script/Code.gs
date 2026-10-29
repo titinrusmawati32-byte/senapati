@@ -294,12 +294,6 @@ function getSiteConfig() {
 
   const values = sheet.getDataRange().getValues();
   const config = {};
-  const publicKeys = [
-    "namaSekolah", "alamat", "telepon", "email", "whatsapp",
-    "jamLayanan", "mapEmbedUrl", "spmbStatus", "spmbMulai",
-    "spmbSelesai", "spmbJadwalBerikutnya", "biayaPendaftaran",
-    "akreditasi", "jumlahSiswa", "jumlahGuru", "sambutanKepsek"
-  ];
 
   for (let i = 1; i < values.length; i++) {
     const key = String(values[i][0]).trim();
@@ -307,7 +301,7 @@ function getSiteConfig() {
     if (val instanceof Date) {
       val = Utilities.formatDate(val, "Asia/Jakarta", "yyyy-MM-dd");
     }
-    if (publicKeys.includes(key)) {
+    if (key) {
       config[key] = val !== undefined ? val : "";
     }
   }
@@ -367,6 +361,8 @@ function adminSaveKonten(items, session) {
       pSheet.appendRow([k, v]);
     }
   });
+
+  SpreadsheetApp.flush(); // Komit langsung ke Google Sheets seketika tanpa delay
 
   logActivity(session.namaPengguna, "UBAH_KONTEN", "Pengaturan", `Memperbarui ${items.length} data pengaturan.`);
   return { saved: items.length };

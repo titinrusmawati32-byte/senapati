@@ -43,57 +43,74 @@ function initNavigation() {
 }
 
 // ==========================================
-// 2. DATA GLOBAL DARI GETSITECONFIG
+// 2. DATA GLOBAL DARI GETSITECONFIG (INSTAN VIA LOCALSTORAGE)
 // ==========================================
-async function initGlobalData() {
-  try {
-    const config = await SchoolAPI.get("getSiteConfig");
-    if (!config) return;
+function applyConfigToDom(config) {
+  if (!config) return;
 
-    // Terapkan ke elemen yang memakai atribut data-config
-    document.querySelectorAll("[data-config]").forEach((el) => {
-      const key = el.getAttribute("data-config");
-      if (config[key]) {
-        if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
-          el.value = config[key];
-        } else if (el.tagName === "A" && key === "whatsapp") {
-          const cleanWa = String(config[key]).replace(/\D/g, "");
-          el.href = `https://wa.me/${cleanWa}?text=Halo%20Admin%20SDN%20Sumberejo%2004,%20saya%20ingin%20bertanya%20informasi%20sekolah.`;
-        } else if (el.tagName === "A" && key === "telepon") {
-          el.href = `tel:${config[key]}`;
-          el.textContent = config[key];
-        } else if (el.tagName === "A" && key === "email") {
-          el.href = `mailto:${config[key]}`;
-          el.textContent = config[key];
-        } else if (el.tagName === "IFRAME" && key === "mapEmbedUrl") {
-          el.src = config[key];
-        } else {
-          el.textContent = config[key];
-        }
-      }
-    });
-
-    // Perbarui tautan tombol floating WhatsApp jika ada
-    const floatWa = document.getElementById("floatingWa");
-    if (floatWa && config.whatsapp) {
-      const cleanWa = String(config.whatsapp).replace(/\D/g, "");
-      floatWa.href = `https://wa.me/${cleanWa}?text=Halo%20Admin%20SDN%20Sumberejo%2004,%20saya%20ingin%20bertanya.`;
-    }
-
-    // Status pendaftaran SPMB global
-    const spmbStatusBadges = document.querySelectorAll(".spmb-status-badge");
-    spmbStatusBadges.forEach((badge) => {
-      if (config.spmbStatus === "buka") {
-        badge.className = "spmb-status-badge alert alert-success";
-        badge.innerHTML = `<strong>SPMB Telah Dibuka!</strong> Pendaftaran dibuka mulai tanggal ${formatDateId(config.spmbMulai)} hingga ${formatDateId(config.spmbSelesai)}.`;
+  // Terapkan ke elemen yang memakai atribut data-config
+  document.querySelectorAll("[data-config]").forEach((el) => {
+    const key = el.getAttribute("data-config");
+    if (config[key] !== undefined && config[key] !== "") {
+      if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+        el.value = config[key];
+      } else if (el.tagName === "A" && key === "whatsapp") {
+        const cleanWa = String(config[key]).replace(/\D/g, "");
+        el.href = `https://wa.me/${cleanWa}?text=Halo%20Admin%20${encodeURIComponent(config.namaSekolah || "SD Negeri Sumberejo")},%20saya%20ingin%20bertanya%20informasi%20sekolah.`;
+      } else if (el.tagName === "A" && key === "telepon") {
+        el.href = `tel:${config[key]}`;
+        el.textContent = config[key];
+      } else if (el.tagName === "A" && key === "email") {
+        el.href = `mailto:${config[key]}`;
+        el.textContent = config[key];
+      } else if (el.tagName === "IFRAME" && key === "mapEmbedUrl") {
+        el.src = config[key];
       } else {
-        badge.className = "spmb-status-badge alert alert-warning";
-        badge.innerHTML = `<strong>Pendaftaran Ditutup.</strong> ${config.spmbJadwalBerikutnya || "Nantikan pembukaan gelombang berikutnya."}`;
+        el.textContent = config[key];
       }
-    });
-  } catch (err) {
-    console.warn("Menggunakan data statis bawaan karena backend belum terhubung.");
+    }
+  });
+
+  // Perbarui tautan tombol floating WhatsApp jika ada
+  const floatWa = document.getElementById("floatingWa");
+  if (floatWa && config.whatsapp) {
+    const cleanWa = String(config.whatsapp).replace(/\D/g, "");
+    floatWa.href = `https://wa.me/${cleanWa}?text=Halo%20Admin%20${encodeURIComponent(config.namaSekolah || "SD Negeri Sumberejo")},%20saya%20ingin%20bertanya.`;
   }
+
+  // Status pendaftaran SPMB global
+  const spmbStatusBadges = document.querySelectorAll(".spmb-status-badge");
+  spmbStatusBadges.forEach((badge) => {
+    if (config.spmbStatus === "buka") {
+      badge.className = "spmb-status-badge alert alert-success";
+      badge.innerHTML = `<strong>SPMB Telah Dibuka!</strong> Pendaftaran dibuka mulai tanggal ${formatDateId(config.spmbMulai)} hingga ${formatDateId(config.spmbSelesai)}.`;
+    } else {
+      badge.className = "spmb-status-badge alert alert-warning";
+      badge.innerHTML = `<strong>Pendaftaran Ditutup.</strong> ${config.spmbJadwalBerikutnya || "Nantikan pembukaan gelombang berikutnya."}`;
+    }
+  });
+}
+
+function initGlobalData() {
+  // 1. Terapkan seketika (0 ms) dari cache lokal jika ada
+  try {
+    const cached = localStorage.getItem("sdn_site_config");
+    if (cached) {
+      applyConfigToDom(JSON.parse(cached));
+    }
+  } catch (e) {}
+
+  // 2. Ambil data segar langsung dari Google Apps Script di latar belakang
+  SchoolAPI.get("getSiteConfig")
+    .then((freshConfig) => {
+      if (freshConfig && Object.keys(freshConfig).length > 0) {
+        localStorage.setItem("sdn_site_config", JSON.stringify(freshConfig));
+        applyConfigToDom(freshConfig);
+      }
+    })
+    .catch((err) => {
+      console.warn("[Config Sync]: Menggunakan cache/data lokal.");
+    });
 }
 
 // ==========================================

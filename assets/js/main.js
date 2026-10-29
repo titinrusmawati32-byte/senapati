@@ -411,17 +411,23 @@ function normalizePengumumanList(rawList) {
       }
     }
 
-    let bannerUrl = item.fotoUrl || item.bannerUrl || "";
-    if (!bannerUrl) {
-      if (kategoriClass === "green") {
-        bannerUrl = "assets/img/pengumuman-pts.svg";
-      } else if (kategoriClass === "purple") {
-        bannerUrl = "assets/img/pengumuman-rapat-ortu.svg";
-      } else {
-        bannerUrl = "assets/img/pengumuman-sumpah-pemuda.svg";
-      }
+    // Cari foto dari semua kemungkinan nama kolom yang diupload dari CMS
+    const uploadedPhoto = item.fotoUrl || item.bannerUrl || item.foto || item.gambar || item.thumbnail || item.foto_url || item.image || item.url || item.urlFoto || "";
+    let isCustomPhoto = false;
+    let fallbackSvg = "assets/img/pengumuman-sumpah-pemuda.svg";
+
+    if (kategoriClass === "green") {
+      fallbackSvg = "assets/img/pengumuman-pts.svg";
+    } else if (kategoriClass === "purple") {
+      fallbackSvg = "assets/img/pengumuman-rapat-ortu.svg";
+    }
+
+    let bannerUrl = "";
+    if (uploadedPhoto && uploadedPhoto.trim() !== "") {
+      bannerUrl = formatPhotoUrl(uploadedPhoto.trim());
+      isCustomPhoto = true;
     } else {
-      bannerUrl = formatPhotoUrl(bannerUrl);
+      bannerUrl = fallbackSvg;
     }
 
     return {
@@ -432,6 +438,9 @@ function normalizePengumumanList(rawList) {
       kategoriClass,
       kategoriIcon,
       bannerUrl,
+      rawPhoto: uploadedPhoto,
+      isCustomPhoto,
+      fallbackSvg,
       isi: item.isi || ""
     };
   });
@@ -459,14 +468,18 @@ function renderPengumumanCards(container, list) {
 
   container.innerHTML = displayItems
     .map(
-      (item) => `
+      (item) => {
+        const driveId = extractDriveId(item.rawPhoto || item.bannerUrl);
+        const fallbackSvg = item.fallbackSvg || "assets/img/pengumuman-sumpah-pemuda.svg";
+        return `
     <article class="pengumuman-card is-revealed">
       <div class="pengumuman-thumb-wrap">
         <img src="${escapeHtml(item.bannerUrl)}" 
              alt="${escapeHtml(item.judul)}" 
              class="pengumuman-thumb" 
              loading="lazy" 
-             onerror="this.onerror=null; this.src='assets/img/pengumuman-sumpah-pemuda.svg';">
+             referrerpolicy="no-referrer"
+             onerror="handleThumbError(this, '${driveId || ''}', '${fallbackSvg}')">
       </div>
       <div class="pengumuman-card-content">
         <div class="pengumuman-meta-row">
@@ -487,7 +500,8 @@ function renderPengumumanCards(container, list) {
         </div>
       </div>
     </article>
-  `
+  `;
+      }
     )
     .join("");
 
@@ -508,9 +522,12 @@ function openPengumumanModal(id) {
     .map((p) => `<p style="margin-bottom: 0.85rem; line-height: 1.7; color: #334155;">${p}</p>`)
     .join("");
 
+  const modalDriveId = extractDriveId(item.rawPhoto || item.bannerUrl);
+  const modalFallbackSvg = item.fallbackSvg || "assets/img/pengumuman-sumpah-pemuda.svg";
+
   content.innerHTML = `
     <div style="border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem; max-height: 280px; background: #0f172a;">
-      <img src="${escapeHtml(item.bannerUrl)}" alt="${escapeHtml(item.judul)}" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='assets/img/pengumuman-sumpah-pemuda.svg';">
+      <img src="${escapeHtml(item.bannerUrl)}" alt="${escapeHtml(item.judul)}" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy" referrerpolicy="no-referrer" onerror="handleThumbError(this, '${modalDriveId || ''}', '${modalFallbackSvg}')">
     </div>
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
       <span class="pengumuman-date" style="font-size: 0.9rem;">
@@ -550,10 +567,13 @@ function openAllPengumumanModal() {
 
   listEl.innerHTML = currentAllPengumumanList
     .map(
-      (item) => `
+      (item) => {
+        const driveId = extractDriveId(item.rawPhoto || item.bannerUrl);
+        const fallbackSvg = item.fallbackSvg || "assets/img/pengumuman-sumpah-pemuda.svg";
+        return `
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem; display: flex; gap: 1rem; align-items: center; transition: all 0.2s ease;">
       <div style="width: 80px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #0f172a;">
-        <img src="${escapeHtml(item.bannerUrl)}" alt="${escapeHtml(item.judul)}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='assets/img/pengumuman-sumpah-pemuda.svg';">
+        <img src="${escapeHtml(item.bannerUrl)}" alt="${escapeHtml(item.judul)}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" referrerpolicy="no-referrer" onerror="handleThumbError(this, '${driveId || ''}', '${fallbackSvg}')">
       </div>
       <div style="flex: 1; min-width: 0;">
         <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
@@ -567,7 +587,8 @@ function openAllPengumumanModal() {
         Baca
       </button>
     </div>
-  `
+  `;
+      }
     )
     .join("");
 
@@ -1134,12 +1155,33 @@ function getDefaultAvatarHtml(nama) {
 function formatPhotoUrl(url) {
   if (!url) return "";
   const clean = String(url).trim();
+  if (clean.startsWith("data:") || clean.startsWith("assets/") || clean.startsWith("./assets/")) {
+    return clean;
+  }
   const fileId = extractDriveId(clean);
   if (fileId) {
-    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+    // lh3.googleusercontent.com adalah CDN resmi Google Drive yang langsung menampilkan foto tanpa cookie redirect
+    return `https://lh3.googleusercontent.com/d/${fileId}=w1200`;
   }
   return clean;
 }
+
+function handleThumbError(imgEl, driveId, fallbackSvg) {
+  if (!imgEl) return;
+  const cur = imgEl.src || "";
+  // Percobaan bertingkat untuk foto Google Drive
+  if (driveId && cur.includes("googleusercontent.com")) {
+    imgEl.src = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1200`;
+    return;
+  }
+  if (driveId && cur.includes("thumbnail?id=")) {
+    imgEl.src = `https://drive.google.com/uc?export=view&id=${driveId}`;
+    return;
+  }
+  imgEl.onerror = null;
+  imgEl.src = fallbackSvg || "assets/img/pengumuman-sumpah-pemuda.svg";
+}
+window.handleThumbError = handleThumbError;
 
 function extractDriveId(url) {
   if (!url) return null;

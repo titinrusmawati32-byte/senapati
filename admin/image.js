@@ -5,15 +5,15 @@
  */
 
 window.ImageProcessor = (function () {
-  const MAX_INPUT_SIZE = 15 * 1024 * 1024; // 15 MB
-  const TARGET_MAX_OUTPUT_SIZE = 600 * 1024; // 600 KB
-  const ABSOLUTE_MAX_OUTPUT_SIZE = 1.5 * 1024 * 1024; // 1.5 MB (Batas aman GAS)
-  const MAX_DIMENSION_DEFAULT = 1600; // px
-  const MAX_DIMENSION_HERO = 2000; // px
+  const MAX_INPUT_SIZE = 50 * 1024 * 1024; // 50 MB (Limit maksimal foto per upload sesuai permintaan)
+  const TARGET_MAX_OUTPUT_SIZE = 800 * 1024; // 800 KB (Kualitas HD jernih & tajam)
+  const ABSOLUTE_MAX_OUTPUT_SIZE = 4.5 * 1024 * 1024; // 4.5 MB (Batas aman payload GAS)
+  const MAX_DIMENSION_DEFAULT = 1800; // px
+  const MAX_DIMENSION_HERO = 2400; // px
 
   /**
    * Mengompresi berkas gambar dari input file
-   * @param {File} file Berkas gambar asli dari input/kamera
+   * @param {File} file Berkas gambar asli dari input/kamera (hingga 50 MB)
    * @param {string} purpose Tujuan penggunaan ('hero', 'guru', 'fasilitas', dll)
    * @returns {Promise<{base64: string, mime: string, name: string, width: number, height: number, size: number}>}
    */
@@ -21,7 +21,7 @@ window.ImageProcessor = (function () {
     if (!file) throw new Error("Berkas gambar tidak ditemukan.");
 
     if (file.size > MAX_INPUT_SIZE) {
-      throw new Error(`Ukuran foto terlalu besar (${(file.size / (1024 * 1024)).toFixed(1)} MB). Maksimal 15 MB sebelum kompresi.`);
+      throw new Error(`Ukuran foto (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 50 MB. Mohon pilih foto di bawah 50 MB.`);
     }
 
     const maxDimension = purpose === "hero" ? MAX_DIMENSION_HERO : MAX_DIMENSION_DEFAULT;
@@ -52,17 +52,23 @@ window.ImageProcessor = (function () {
     ctx.fillRect(0, 0, width, height);
     ctx.drawImage(imgBitmap, 0, 0, width, height);
 
-    // Kompresi bertahap untuk mencapai target di bawah 600 KB
-    let quality = 0.82;
+    // Kompresi bertahap untuk mencapai target di bawah 800 KB dengan kualitas visual tinggi
+    let quality = 0.85;
     let blob = await getCanvasBlob(canvas, "image/jpeg", quality);
 
-    while (blob.size > TARGET_MAX_OUTPUT_SIZE && quality > 0.55) {
+    while (blob.size > TARGET_MAX_OUTPUT_SIZE && quality > 0.45) {
       quality -= 0.08;
       blob = await getCanvasBlob(canvas, "image/jpeg", quality);
     }
 
     if (blob.size > ABSOLUTE_MAX_OUTPUT_SIZE) {
-      throw new Error(`Gagal mengompresi foto ke batas aman (${(blob.size / (1024 * 1024)).toFixed(2)} MB). Mohon gunakan foto dengan resolusi lebih rendah.`);
+      // Jika masih terlalu besar, lakukan resize sekunder 80%
+      canvas.width = Math.round(width * 0.8);
+      canvas.height = Math.round(height * 0.8);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(imgBitmap, 0, 0, canvas.width, canvas.height);
+      blob = await getCanvasBlob(canvas, "image/jpeg", 0.75);
     }
 
     // Konversi blob ke base64 murni (tanpa prefix data:image/jpeg;base64,)

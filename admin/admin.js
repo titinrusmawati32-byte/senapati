@@ -580,11 +580,18 @@
       if (!fileInput.files || !fileInput.files[0]) return;
       const file = fileInput.files[0];
 
+      // Batas maksimal upload foto 50 MB
+      if (file.size > 50 * 1024 * 1024) {
+        showToast(`Ukuran berkas foto (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 50 MB.`, "error");
+        fileInput.value = "";
+        return;
+      }
+
       progress.style.display = "block";
       progressText.textContent = `Mengompresi ${file.name} di browser...`;
 
       try {
-        // Kompresi di sisi browser via ImageProcessor
+        // Kompresi di sisi browser via ImageProcessor (Maks 50 MB)
         const processed = await ImageProcessor.compress(file);
         progressText.textContent = `Mengunggah ${processed.name} (${processed.sizeFormatted}) ke Google Drive...`;
 
@@ -695,8 +702,14 @@
     if (sheetName === "Pengumuman") {
       tbody.innerHTML = items
         .map(
-          (it) => `
+          (it) => {
+            const rawPhoto = it.fotoUrl || it.bannerUrl || it.foto || it.gambar || it.thumbnail || "";
+            const displayPhoto = rawPhoto ? formatPhotoUrl(rawPhoto) : "";
+            return `
         <tr>
+          <td>
+            ${displayPhoto ? `<img src="${displayPhoto}" style="width: 62px; height: 42px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border);" onerror="this.onerror=null; this.src='../assets/img/pengumuman-sumpah-pemuda.svg';">` : `<div style="width: 62px; height: 42px; border-radius: 6px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">📢</div>`}
+          </td>
           <td><strong>${escapeHtml(it.judul)}</strong><br><small style="color: var(--text-muted);">${escapeHtml(it.isi ? it.isi.substring(0, 60) + '...' : '')}</small></td>
           <td>${it.tanggal || "-"}</td>
           <td>${renderStatusToggle(sheetName, it.id, it.tampil)}</td>
@@ -707,7 +720,8 @@
             </div>
           </td>
         </tr>
-      `
+      `;
+          }
         )
         .join("");
     } else if (sheetName === "Guru") {
@@ -835,20 +849,33 @@
       let fieldsHtml = `<input type="hidden" name="id" value="${item ? item.id : ''}">`;
 
       if (sheetName === "Pengumuman") {
+        const currentPhoto = item ? (item.fotoUrl || item.bannerUrl || item.foto || item.gambar || item.thumbnail || item.url || "") : "";
+        const currentCat = item ? (item.kategori || "Kegiatan Sekolah") : "Kegiatan Sekolah";
         fieldsHtml += `
           <div class="form-group">
             <label class="form-label">Judul Pengumuman *</label>
             <input type="text" name="judul" class="form-control" value="${escapeHtml(item ? item.judul : '')}" required placeholder="Contoh: Jadwal Libur Semester">
           </div>
-          <div class="form-group">
-            <label class="form-label">Tanggal Pengumuman *</label>
-            <input type="date" name="tanggal" class="form-control" value="${item ? item.tanggal : new Date().toISOString().split('T')[0]}" required>
+          <div class="form-row two-col">
+            <div class="form-group">
+              <label class="form-label">Tanggal Pengumuman *</label>
+              <input type="date" name="tanggal" class="form-control" value="${item ? item.tanggal : new Date().toISOString().split('T')[0]}" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Kategori Pengumuman</label>
+              <select name="kategori" class="form-control">
+                <option value="Kegiatan Sekolah" ${currentCat === 'Kegiatan Sekolah' ? 'selected' : ''}>📢 Kegiatan Sekolah</option>
+                <option value="Akademik" ${currentCat === 'Akademik' ? 'selected' : ''}>📖 Akademik</option>
+                <option value="Orang Tua" ${currentCat === 'Orang Tua' ? 'selected' : ''}>👥 Orang Tua</option>
+                <option value="Informasi Sekolah" ${currentCat === 'Informasi Sekolah' ? 'selected' : ''}>ℹ️ Informasi Sekolah</option>
+              </select>
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Isi Lengkap Pengumuman *</label>
             <textarea name="isi" rows="4" class="form-control" required placeholder="Tuliskan isi pengumuman secara rinci...">${escapeHtml(item ? item.isi : '')}</textarea>
           </div>
-          ${renderPhotoUploadControl("fotoUrl", item ? item.fotoUrl : "", "Foto / Brosur Pengumuman (Opsional)")}
+          ${renderPhotoUploadControl("fotoUrl", currentPhoto, "Foto Thumbnail Pengumuman (Maks. 50 MB)")}
         `;
       } else if (sheetName === "Guru") {
         fieldsHtml += `
@@ -1009,14 +1036,19 @@
   window.AppCollections = AppCollections;
 
   function renderPhotoUploadControl(fieldName, currentVal, label) {
+    const previewUrl = currentVal ? formatPhotoUrl(currentVal) : "";
     return `
       <div class="form-group">
         <label class="form-label">${label}</label>
         <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
-          <img id="previewColImg_${fieldName}" src="${currentVal || ''}" 
-               style="width: 72px; height: 72px; border-radius: var(--radius); object-fit: cover; background: #e2e8f0; border: 1px solid var(--border); display: ${currentVal ? 'block' : 'none'};">
+          <img id="previewColImg_${fieldName}" src="${previewUrl}" 
+               style="width: 80px; height: 60px; border-radius: var(--radius); object-fit: cover; background: #e2e8f0; border: 1px solid var(--border); display: ${previewUrl ? 'block' : 'none'};"
+               onerror="this.style.display='none';">
           <div style="flex: 1; min-width: 200px;">
-            <input type="file" id="fileColInput_${fieldName}" accept="image/jpeg,image/png,image/webp" class="form-control" style="font-size: 0.85rem;">
+            <input type="file" id="fileColInput_${fieldName}" accept="image/*" class="form-control" style="font-size: 0.85rem;">
+            <small style="display: block; color: var(--text-muted); margin-top: 0.25rem;">
+              📷 Format: JPG, PNG, WEBP (Batas maksimal ukuran foto hingga <strong>50 MB</strong>)
+            </small>
             <div id="colUploadProgress_${fieldName}" style="display: none; font-size: 0.8rem; color: var(--primary); margin-top: 0.35rem;">
               ⏳ Mengompresi dan mengunggah foto...
             </div>
@@ -1034,6 +1066,14 @@
       input.addEventListener("change", async () => {
         if (!input.files || !input.files[0]) return;
         const file = input.files[0];
+
+        // Validasi batas 50 MB
+        if (file.size > 50 * 1024 * 1024) {
+          showToast(`Ukuran berkas (${(file.size / (1024 * 1024)).toFixed(1)} MB) melebihi batas 50 MB.`, "error");
+          input.value = "";
+          return;
+        }
+
         const fieldName = input.id.replace("fileColInput_", "");
         const preview = document.getElementById("previewColImg_" + fieldName);
         const progress = document.getElementById("colUploadProgress_" + fieldName);
@@ -1042,7 +1082,7 @@
         if (progress) progress.style.display = "block";
 
         try {
-          // Kompresi di browser (target < 600 KB)
+          // Kompresi di browser (Mendukung hingga 50 MB)
           const compressed = await ImageProcessor.compress(file);
           if (progress) progress.textContent = `Mengunggah ${compressed.name} (${compressed.sizeFormatted})...`;
 
@@ -1057,7 +1097,7 @@
 
           hiddenVal.value = res.url;
           if (preview) {
-            preview.src = res.url;
+            preview.src = formatPhotoUrl(res.url);
             preview.style.display = "block";
           }
           showToast("Foto berhasil dikompresi dan terunggah!", "success");
@@ -1141,6 +1181,16 @@
       dataObj.url = tipe === "foto" ? (dataObj.url_foto || "") : (dataObj.url_video || "");
       delete dataObj.url_foto;
       delete dataObj.url_video;
+    }
+
+    // Tangani thumbnail Pengumuman agar kompatibel dengan seluruh alias kolom sheet
+    if (sheetName === "Pengumuman") {
+      const photoVal = dataObj.fotoUrl || dataObj.bannerUrl || dataObj.foto || "";
+      dataObj.fotoUrl = photoVal;
+      dataObj.bannerUrl = photoVal;
+      dataObj.foto = photoVal;
+      dataObj.gambar = photoVal;
+      dataObj.thumbnail = photoVal;
     }
 
     // Status Tampil Boolean
@@ -1228,6 +1278,31 @@
     }, 3500);
   }
   window.showToast = showToast;
+
+  function formatPhotoUrl(url) {
+    if (!url) return "";
+    const clean = String(url).trim();
+    if (clean.startsWith("data:") || clean.startsWith("assets/") || clean.startsWith("../assets/")) {
+      return clean;
+    }
+    const fileId = extractDriveId(clean);
+    if (fileId) {
+      return `https://lh3.googleusercontent.com/d/${fileId}=w1000`;
+    }
+    return clean;
+  }
+
+  function extractDriveId(url) {
+    if (!url) return null;
+    const str = String(url).trim();
+    const m1 = str.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (m1) return m1[1];
+    const m2 = str.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (m2) return m2[1];
+    const m3 = str.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m3) return m3[1];
+    return null;
+  }
 
   function escapeHtml(str) {
     if (!str) return "";

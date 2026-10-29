@@ -268,11 +268,11 @@ a:hover { color: var(--primary-hover); }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center right;
+  object-position: center;
   display: block;
 }
 
-/* Gradien Gelap Elegan agar Tulisan di Kiri Terbaca Jelas & Logo Video di Kanan Terlihat Penuh */
+/* Gradien Transparan Sinematik: Teks di Kiri Sangat Terbaca & Video Emas di Kanan Terang Maksimal */
 .hero-video-overlay {
   position: absolute;
   top: 0;
@@ -282,9 +282,9 @@ a:hover { color: var(--primary-hover); }
   background: linear-gradient(
     90deg,
     rgba(15, 23, 42, 0.92) 0%,
-    rgba(15, 23, 42, 0.82) 40%,
-    rgba(15, 23, 42, 0.45) 75%,
-    rgba(15, 23, 42, 0.3) 100%
+    rgba(15, 23, 42, 0.72) 38%,
+    rgba(15, 23, 42, 0.25) 68%,
+    rgba(15, 23, 42, 0.1) 100%
   );
   pointer-events: none;
 }

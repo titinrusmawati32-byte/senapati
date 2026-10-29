@@ -713,12 +713,14 @@
           (it) => {
             const rawPhoto = it.fotoUrl || it.bannerUrl || it.foto || it.gambar || it.thumbnail || "";
             const displayPhoto = rawPhoto ? formatPhotoUrl(rawPhoto) : "";
+            const isiStr = it.isi !== undefined && it.isi !== null ? String(it.isi) : "";
+            const excerpt = isiStr.length > 60 ? isiStr.substring(0, 60) + "..." : isiStr;
             return `
         <tr>
           <td>
             ${displayPhoto ? `<img src="${displayPhoto}" style="width: 62px; height: 42px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border);" onerror="this.onerror=null; this.src='../assets/img/pengumuman-sumpah-pemuda.svg';">` : `<div style="width: 62px; height: 42px; border-radius: 6px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">📢</div>`}
           </td>
-          <td><strong>${escapeHtml(it.judul)}</strong><br><small style="color: var(--text-muted);">${escapeHtml(it.isi ? it.isi.substring(0, 60) + '...' : '')}</small></td>
+          <td><strong>${escapeHtml(it.judul)}</strong><br><small style="color: var(--text-muted);">${escapeHtml(excerpt)}</small></td>
           <td>${it.tanggal || "-"}</td>
           <td>${renderStatusToggle(sheetName, it.id, it.tampil)}</td>
           <td>
@@ -779,14 +781,17 @@
     } else if (sheetName === "Fasilitas") {
       tbody.innerHTML = items
         .map(
-          (it) => `
+          (it) => {
+            const deskStr = it.deskripsi !== undefined && it.deskripsi !== null ? String(it.deskripsi) : "";
+            const deskExcerpt = deskStr.length > 50 ? deskStr.substring(0, 50) + "..." : deskStr;
+            return `
         <tr>
           <td><strong>${it.urutan || 99}</strong></td>
           <td>
             ${it.fotoUrl ? `<img src="${it.fotoUrl}" style="width: 54px; height: 38px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border);">` : `<div style="width: 54px; height: 38px; border-radius: 4px; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 1rem;">🏢</div>`}
           </td>
           <td><strong>${escapeHtml(it.nama)}</strong></td>
-          <td><small style="color: var(--text-muted);">${escapeHtml(it.deskripsi ? it.deskripsi.substring(0, 50) + '...' : '')}</small></td>
+          <td><small style="color: var(--text-muted);">${escapeHtml(deskExcerpt)}</small></td>
           <td>${renderStatusToggle(sheetName, it.id, it.tampil)}</td>
           <td>
             <div style="display: flex; gap: 0.35rem;">
@@ -795,7 +800,8 @@
             </div>
           </td>
         </tr>
-      `
+      `;
+          }
         )
         .join("");
     } else if (sheetName === "Galeri") {

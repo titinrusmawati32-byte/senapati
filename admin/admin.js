@@ -1029,11 +1029,18 @@
       if (!confirm(`Apakah Anda yakin ingin menghapus data ${sheetName} ini?`)) return;
 
       try {
+        // Optimistic UI: hapus langsung dari tabel lokal agar instan
+        if (AppState.collections && AppState.collections[sheetName]) {
+          AppState.collections[sheetName] = AppState.collections[sheetName].filter((x) => String(x.id) !== String(id));
+          renderCollectionTable(sheetName, AppState.collections[sheetName]);
+        }
+
         await apiCall("admin_deleteRow", { sheetName, id });
         showToast(`Data ${sheetName} berhasil dihapus!`, "success");
         loadCollection(sheetName);
       } catch (e) {
         showToast("Gagal menghapus: " + e.message, "error");
+        loadCollection(sheetName);
       }
     },
 

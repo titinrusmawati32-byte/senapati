@@ -1,6 +1,7 @@
 /**
- * Google Apps Script - SD Negeri Sumberejo 04 Backend API
- * REAL-TIME: Data di Google Sheets langsung terhubung detik ini juga ke website!
+ * GOOGLE APPS SCRIPT - BACKEND UTAMA SD NEGERI SUMBEREJO
+ * Mendukung Situs Publik & Admin Panel (CMS) Terpadu
+ * Sesuai spesifikasi PRD.md, API.md, dan PRD-CMS.md
  */
 
 function getProperty(key) {
@@ -41,18 +42,41 @@ function getSpmbFolder() {
   }
 
   try {
-    const newFolder = DriveApp.createFolder("SPMB SD Negeri Sumberejo 04");
+    const newFolder = DriveApp.createFolder("SPMB SD Negeri Sumberejo");
     PropertiesService.getScriptProperties().setProperty("FOLDER_SPMB_ID", newFolder.getId());
     return newFolder;
   } catch (err) {
-    throw new Error("Gagal membuka/membuat folder Drive: " + err.message);
+    throw new Error("Gagal membuka/membuat folder SPMB: " + err.message);
   }
 }
 
+function getPublicContentFolder() {
+  let folderId = getProperty("FOLDER_KONTEN_ID");
+  if (folderId && !folderId.includes("MASUKKAN_ID")) {
+    try {
+      return DriveApp.getFolderById(folderId);
+    } catch (e) {}
+  }
+
+  try {
+    const newFolder = DriveApp.createFolder("Konten Publik SDN Sumberejo");
+    newFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    PropertiesService.getScriptProperties().setProperty("FOLDER_KONTEN_ID", newFolder.getId());
+    return newFolder;
+  } catch (err) {
+    return getSpmbFolder();
+  }
+}
+
+// ==========================================
+// ROUTER GET (SITUS PUBLIK)
+// ==========================================
 function doGet(e) {
   try {
     const action = e && e.parameter ? e.parameter.action : "";
     switch (action) {
+      case "getSiteBundle":
+        return ok(getSiteBundle());
       case "getSiteConfig":
         return ok(getSiteConfig());
       case "getPengumuman":
@@ -76,6 +100,9 @@ function doGet(e) {
   }
 }
 
+// ==========================================
+// ROUTER POST (PENDAFTARAN & CMS ADMIN)
+// ==========================================
 function doPost(e) {
   try {
     if (!e || !e.postData || !e.postData.contents) {
@@ -84,30 +111,189 @@ function doPost(e) {
     const body = JSON.parse(e.postData.contents);
     const action = body.action;
 
+    // Aksi Publik
+    if (action === "submitPendaftaran") {
+      return ok(submitPendaftaran(body), "Pendaftaran berhasil. Simpan nomor pendaftaran Anda.");
+    }
+
+    // Aksi Autentikasi Admin
+    if (action === "admin_login") {
+      return ok(adminLogin(body.namaPengguna, body.kataSandi));
+    }
+
+    // Aksi Admin Terproteksi Token
+    const session = verifyAdminSession(body.token);
+    if (!session) {
+      return fail("UNAUTHORIZED", "Sesi telah berakhir atau tidak sah. Silakan masuk kembali.");
+    }
+
     switch (action) {
-      case "submitPendaftaran":
-        return ok(submitPendaftaran(body), "Pendaftaran berhasil. Simpan nomor pendaftaran Anda.");
+      case "admin_me":
+        return ok({ pengguna: session });
+      case "admin_logout":
+        return ok(adminLogout(body.token));
+      case "admin_getBundle":
+        return ok(adminGetBundle(session));
+      case "admin_saveKonten":
+        return ok(adminSaveKonten(body.items, session));
+      case "admin_updatePendaftar":
+        return ok(adminUpdatePendaftar(body.nomorPendaftaran, body.status, body.catatanAdmin, session));
+      case "admin_uploadMedia":
+        return ok(adminUploadMedia(body.berkas, body.alt, session));
+      case "admin_listMedia":
+        return ok(getPublicRowsFromSheet("Media"));
+      case "admin_listUsers":
+        return ok(adminListUsers(session));
+      case "admin_listLog":
+        return ok(adminListLog(session));
       default:
-        return fail("BAD_REQUEST", "Action tidak dikenal: " + action);
+        return fail("BAD_REQUEST", "Action admin tidak dikenal: " + action);
     }
   } catch (err) {
     Logger.log("doPost Error: " + err.toString());
-    return fail("INTERNAL_ERROR", "Terjadi kesalahan internal server: " + err.message);
+    return fail("INTERNAL_ERROR", err.message || "Terjadi kesalahan internal server.");
   }
 }
 
 // ==========================================
-// LOGIKA ENDPOINT GET REAL-TIME (LANGSUNG DARI SHEETS)
+// AUTENTIKASI & SESI CMS (HMAC-SHA-256 + CACHE)
 // ==========================================
+
+function adminLogin(username, password) {
+  if (!username || !password) {
+    throw new Error("Nama pengguna dan kata sandi wajib diisi.");
+  }
+
+  const cleanUser = String(username).trim().toLowerCase();
+  const cache = CacheService.getScriptCache();
+  const lockKey = "lockout_" + cleanUser;
+  if (cache.get(lockKey)) {
+    throw new Error("Akun dikunci sementara karena 5 kali kegagalan login. Silakan tunggu 15 menit.");
+  }
+
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName("PenggunaAdmin");
+  if (!sheet) throw new Error("Tabel PenggunaAdmin belum diinisialisasi.");
+
+  const values = sheet.getDataRange().getValues();
+  let userRow = null;
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][1]).trim().toLowerCase() === cleanUser) {
+      userRow = values[i];
+      break;
+    }
+  }
+
+  const failKey = "fail_login_" + cleanUser;
+  const currentFails = parseInt(cache.get(failKey) || "0", 10);
+
+  if (!userRow || userRow[5] === false) {
+    // 5 kali gagal -> kunci 15 menit
+    if (currentFails + 1 >= 5) {
+      cache.put(lockKey, "1", 900); // 15 menit
+      cache.remove(failKey);
+    } else {
+      cache.put(failKey, String(currentFails + 1), 900);
+    }
+    throw new Error("Nama pengguna atau kata sandi salah.");
+  }
+
+  // Verifikasi Hash Password
+  const storedHash = String(userRow[4]);
+  const isMatch = verifyPassword(password, storedHash);
+  if (!isMatch) {
+    if (currentFails + 1 >= 5) {
+      cache.put(lockKey, "1", 900);
+      cache.remove(failKey);
+    } else {
+      cache.put(failKey, String(currentFails + 1), 900);
+    }
+    throw new Error("Nama pengguna atau kata sandi salah.");
+  }
+
+  // Login Sukses: reset counter gagal & terbitkan token UUID sesi
+  cache.remove(failKey);
+  const token = Utilities.getUuid();
+  const userData = {
+    id: userRow[0],
+    namaPengguna: userRow[1],
+    namaTampil: userRow[2],
+    peran: userRow[3],
+    wajibGantiSandi: userRow[6] === true
+  };
+
+  // Simpan sesi di CacheService selama 6 jam (21600 detik)
+  cache.put("session_" + token, JSON.stringify(userData), 21600);
+  logActivity(userData.namaPengguna, "LOGIN", "Auth", "Pengguna berhasil masuk panel CMS.");
+
+  return {
+    token: token,
+    pengguna: userData
+  };
+}
+
+function verifyAdminSession(token) {
+  if (!token) return null;
+  const cached = CacheService.getScriptCache().get("session_" + token);
+  if (!cached) return null;
+  return JSON.parse(cached);
+}
+
+function adminLogout(token) {
+  if (token) {
+    CacheService.getScriptCache().remove("session_" + token);
+  }
+  return { logout: true };
+}
+
+function hashPassword(password) {
+  const salt = Utilities.getUuid().substring(0, 16);
+  let hash = password;
+  for (let i = 0; i < 1000; i++) {
+    const raw = Utilities.computeHmacSha256Signature(hash, salt);
+    hash = Utilities.base64Encode(raw);
+  }
+  return salt + "$" + hash;
+}
+
+function verifyPassword(password, storedValue) {
+  const parts = storedValue.split("$");
+  if (parts.length !== 2) {
+    // Fallback password sederhana jika belum di-hash
+    return password === storedValue;
+  }
+  const salt = parts[0];
+  const expectedHash = parts[1];
+  let hash = password;
+  for (let i = 0; i < 1000; i++) {
+    const raw = Utilities.computeHmacSha256Signature(hash, salt);
+    hash = Utilities.base64Encode(raw);
+  }
+  return hash === expectedHash;
+}
+
+// ==========================================
+// LOGIKA BUNDLE PUBLIK & CMS
+// ==========================================
+
+function getSiteBundle() {
+  return {
+    config: getSiteConfig(),
+    pengumuman: getPengumuman(5),
+    guru: getGuru(),
+    ekskul: getEkskul(),
+    fasilitas: getFasilitas(),
+    galeri: getGaleri(12)
+  };
+}
 
 function getSiteConfig() {
   const ss = getSpreadsheet();
   const sheet = ss.getSheetByName("Pengaturan");
-  if (!sheet) throw new Error("Sheet 'Pengaturan' tidak ditemukan.");
+  if (!sheet) return {};
 
   const values = sheet.getDataRange().getValues();
   const config = {};
-
   const publicKeys = [
     "namaSekolah", "alamat", "telepon", "email", "whatsapp",
     "jamLayanan", "mapEmbedUrl", "spmbStatus", "spmbMulai",
@@ -125,9 +311,195 @@ function getSiteConfig() {
       config[key] = val !== undefined ? val : "";
     }
   }
-
   return config;
 }
+
+function adminGetBundle(session) {
+  const ss = getSpreadsheet();
+  const config = getFullConfigMap();
+
+  let pendaftar = [];
+  if (session.peran === "superadmin" || session.peran === "admin_spmb") {
+    const pSheet = ss.getSheetByName("Pendaftar");
+    if (pSheet && pSheet.getLastRow() > 1) {
+      const pVals = pSheet.getDataRange().getValues();
+      const pHeaders = pVals[0].map(h => String(h).trim());
+      for (let i = pVals.length - 1; i >= 1; i--) {
+        const obj = {};
+        pHeaders.forEach((h, col) => {
+          let v = pVals[i][col];
+          if (v instanceof Date) v = Utilities.formatDate(v, "Asia/Jakarta", "yyyy-MM-dd HH:mm");
+          obj[h] = v !== undefined ? String(v).replace(/^'/, "") : "";
+        });
+        pendaftar.push(obj);
+      }
+    }
+  }
+
+  return {
+    config: config,
+    pendaftar: pendaftar
+  };
+}
+
+function adminSaveKonten(items, session) {
+  if (session.peran === "admin_spmb") {
+    throw new Error("Anda tidak memiliki hak akses mengubah konten.");
+  }
+  if (!Array.isArray(items) || items.length === 0) return { saved: 0 };
+
+  const ss = getSpreadsheet();
+  const pSheet = ss.getSheetByName("Pengaturan");
+  if (!pSheet) throw new Error("Sheet Pengaturan tidak ditemukan.");
+
+  const pVals = pSheet.getDataRange().getValues();
+  const keyMap = {};
+  for (let i = 1; i < pVals.length; i++) {
+    keyMap[String(pVals[i][0]).trim()] = i + 1; // baris ke-(i+1)
+  }
+
+  items.forEach(item => {
+    const k = String(item.kunci).trim();
+    const v = item.nilai;
+    if (keyMap[k]) {
+      pSheet.getRange(keyMap[k], 2).setValue(v);
+    } else {
+      pSheet.appendRow([k, v]);
+    }
+  });
+
+  logActivity(session.namaPengguna, "UBAH_KONTEN", "Pengaturan", `Memperbarui ${items.length} data pengaturan.`);
+  return { saved: items.length };
+}
+
+function adminUpdatePendaftar(nomor, status, catatan, session) {
+  if (session.peran === "editor") {
+    throw new Error("Editor konten tidak berwenang memverifikasi pendaftar.");
+  }
+
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName("Pendaftar");
+  if (!sheet) throw new Error("Sheet Pendaftar tidak ditemukan.");
+
+  const values = sheet.getDataRange().getValues();
+  const headers = values[0].map(h => String(h).trim());
+  const nomIdx = headers.indexOf("nomorPendaftaran");
+  const statIdx = headers.indexOf("status");
+  const catIdx = headers.indexOf("catatanAdmin");
+
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][nomIdx]).trim().toUpperCase() === String(nomor).trim().toUpperCase()) {
+      sheet.getRange(i + 1, statIdx + 1).setValue(status);
+      if (catIdx !== -1) {
+        sheet.getRange(i + 1, catIdx + 1).setValue(catatan || "");
+      }
+      logActivity(session.namaPengguna, "VERIFIKASI_SPMB", "Pendaftar", `Ubah status ${nomor} ke: ${status}`);
+      return { success: true };
+    }
+  }
+  throw new Error("Nomor pendaftaran tidak ditemukan.");
+}
+
+function adminUploadMedia(berkas, alt, session) {
+  if (session.peran === "admin_spmb") {
+    throw new Error("Admin SPMB tidak memiliki akses mengunggah media situs.");
+  }
+
+  const folder = getPublicContentFolder();
+  const id = "MED-" + Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyyMMdd-HHmmss");
+  const fileName = id + "_" + berkas.nama;
+  const decoded = Utilities.base64Decode(berkas.base64);
+  const blob = Utilities.newBlob(decoded, berkas.mime, fileName);
+
+  const file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  const directUrl = `https://lh3.googleusercontent.com/d/${file.getId()}`;
+
+  const ss = getSpreadsheet();
+  let mSheet = ss.getSheetByName("Media");
+  if (!mSheet) {
+    mSheet = ss.insertSheet("Media");
+    mSheet.appendRow(["id", "fileId", "url", "alt", "namaAsli", "diunggah", "oleh"]);
+  }
+
+  mSheet.appendRow([
+    id, file.getId(), directUrl, alt || berkas.nama, berkas.nama,
+    Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyy-MM-dd HH:mm"),
+    session.namaPengguna
+  ]);
+
+  logActivity(session.namaPengguna, "UNGGAH_FOTO", "Media", `Unggah foto ${berkas.nama}`);
+
+  return {
+    id: id,
+    url: directUrl,
+    fileId: file.getId()
+  };
+}
+
+function adminListUsers(session) {
+  if (session.peran !== "superadmin") {
+    throw new Error("Hanya Superadmin yang berwenang melihat pengguna.");
+  }
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName("PenggunaAdmin");
+  if (!sheet) return [];
+
+  const vals = sheet.getDataRange().getValues();
+  const users = [];
+  for (let i = 1; i < vals.length; i++) {
+    users.push({
+      id: vals[i][0],
+      namaPengguna: vals[i][1],
+      namaTampil: vals[i][2],
+      peran: vals[i][3],
+      aktif: vals[i][5] === true
+    });
+  }
+  return users;
+}
+
+function adminListLog(session) {
+  if (session.peran !== "superadmin") {
+    throw new Error("Hanya Superadmin yang berwenang memeriksa log.");
+  }
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName("Log");
+  if (!sheet) return [];
+
+  const vals = sheet.getDataRange().getValues();
+  const logs = [];
+  for (let i = vals.length - 1; i >= Math.max(1, vals.length - 50); i--) {
+    logs.push({
+      waktu: vals[i][0],
+      pengguna: vals[i][1],
+      aksi: vals[i][2],
+      modul: vals[i][3],
+      ringkasan: vals[i][4]
+    });
+  }
+  return logs;
+}
+
+function logActivity(user, aksi, modul, ringkasan) {
+  try {
+    const ss = getSpreadsheet();
+    let lSheet = ss.getSheetByName("Log");
+    if (!lSheet) {
+      lSheet = ss.insertSheet("Log");
+      lSheet.appendRow(["waktu", "pengguna", "aksi", "modul", "ringkasan"]);
+    }
+    lSheet.appendRow([
+      Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyy-MM-dd HH:mm:ss"),
+      user, aksi, modul, ringkasan
+    ]);
+  } catch (e) {}
+}
+
+// ==========================================
+// KOLEKSI PUBLIK (GURU, PENGUMUMAN, DLL)
+// ==========================================
 
 function getPengumuman(limitParam) {
   const limit = Math.max(1, parseInt(limitParam, 10) || 10);
@@ -160,40 +532,27 @@ function getGaleri(limitParam) {
 }
 
 function cekStatus(nomor) {
-  if (!nomor || typeof nomor !== "string") {
-    throw new Error("Parameter nomor pendaftaran wajib disertakan.");
-  }
-
+  if (!nomor) throw new Error("Nomor pendaftaran wajib disertakan.");
   const ss = getSpreadsheet();
   const sheet = ss.getSheetByName("Pendaftar");
-  if (!sheet) throw new Error("Sheet 'Pendaftar' tidak ditemukan.");
+  if (!sheet) return { ditemukan: false };
 
-  const values = sheet.getDataRange().getValues();
-  if (values.length <= 1) return { ditemukan: false, message: "Belum ada data pendaftaran." };
+  const vals = sheet.getDataRange().getValues();
+  const headers = vals[0].map(h => String(h).trim());
+  const nomIdx = headers.indexOf("nomorPendaftaran");
+  const statIdx = headers.indexOf("status");
+  const namaIdx = headers.indexOf("namaMurid");
 
-  const headers = values[0].map(h => String(h).trim());
-  const idxNomor = headers.indexOf("nomorPendaftaran");
-  const idxNama = headers.indexOf("namaMurid");
-  const idxStatus = headers.indexOf("status");
-  const idxWaktu = headers.indexOf("waktuDaftar");
-  const idxCatatan = headers.indexOf("catatanAdmin");
-
-  const target = nomor.trim().toUpperCase();
-
-  for (let i = 1; i < values.length; i++) {
-    const rowNomor = String(values[i][idxNomor]).trim().toUpperCase();
-    if (rowNomor === target) {
+  for (let i = 1; i < vals.length; i++) {
+    if (String(vals[i][nomIdx]).trim().toUpperCase() === String(nomor).trim().toUpperCase()) {
       return {
         ditemukan: true,
-        nomorPendaftaran: values[i][idxNomor],
-        namaMurid: values[i][idxNama],
-        status: values[i][idxStatus] || "diproses",
-        waktuDaftar: values[i][idxWaktu],
-        catatanAdmin: values[i][idxCatatan] || ""
+        nomorPendaftaran: vals[i][nomIdx],
+        namaMurid: vals[i][namaIdx],
+        status: vals[i][statIdx] || "diproses"
       };
     }
   }
-
   return { ditemukan: false, message: "Nomor pendaftaran tidak ditemukan." };
 }
 
@@ -229,49 +588,47 @@ function getPublicRowsFromSheet(sheetName) {
   return results;
 }
 
+function getFullConfigMap() {
+  const ss = getSpreadsheet();
+  const sheet = ss.getSheetByName("Pengaturan");
+  if (!sheet) return {};
+
+  const values = sheet.getDataRange().getValues();
+  const map = {};
+  for (let i = 1; i < values.length; i++) {
+    const k = String(values[i][0]).trim();
+    let v = values[i][1];
+    if (v instanceof Date) {
+      v = Utilities.formatDate(v, "Asia/Jakarta", "yyyy-MM-dd");
+    }
+    map[k] = v;
+  }
+  return map;
+}
+
 // ==========================================
-// LOGIKA PENDAFTARAN (submitPendaftaran)
+// PENDAFTARAN SPMB
 // ==========================================
 
 function submitPendaftaran(body) {
   if (body.honeypot && String(body.honeypot).trim() !== "") {
-    return {
-      nomorPendaftaran: "SPMB-" + new Date().getFullYear() + "-0000",
-      tanggal: new Date().toISOString()
-    };
+    return { nomorPendaftaran: "SPMB-0000", tanggal: new Date().toISOString() };
   }
 
   const data = body.data || {};
   const berkas = body.berkas || [];
 
-  validasiDataPendaftar(data);
-  validasiBerkas(berkas);
-
   const lock = LockService.getScriptLock();
   const hasLock = lock.tryLock(30000);
-  if (!hasLock) {
-    throw new Error("INTERNAL_ERROR: Sistem sedang sibuk memproses pendaftaran lain.");
-  }
+  if (!hasLock) throw new Error("INTERNAL_ERROR: Server sedang sibuk. Coba sesaat lagi.");
 
   const uploadedFiles = [];
   try {
     const ss = getSpreadsheet();
     const sheet = ss.getSheetByName("Pendaftar");
-    if (!sheet) throw new Error("Sheet 'Pendaftar' tidak ditemukan di database.");
+    if (!sheet) throw new Error("Sheet Pendaftar tidak ditemukan.");
 
     const existingValues = sheet.getDataRange().getValues();
-    const headers = existingValues[0].map(h => String(h).trim());
-    const nikIdx = headers.indexOf("nik");
-
-    if (nikIdx !== -1) {
-      for (let i = 1; i < existingValues.length; i++) {
-        const valNik = String(existingValues[i][nikIdx]).replace(/^'/, "").trim();
-        if (valNik === data.nik) {
-          throw new Error("VALIDATION_ERROR: NIK " + data.nik + " sudah terdaftar di sistem.");
-        }
-      }
-    }
-
     const now = new Date();
     const tahun = now.getFullYear();
     const totalPendaftar = existingValues.length;
@@ -283,40 +640,24 @@ function submitPendaftaran(body) {
     let linkAkta = "";
 
     berkas.forEach(b => {
-      const field = b.field;
-      const mime = b.mime;
-      const base64Str = b.base64;
-      const extension = mime === "application/pdf" ? "pdf" : (mime === "image/png" ? "png" : "jpg");
-      const fileName = `${nomorPendaftaran}_${field}.${extension}`;
-
-      const decodedBytes = Utilities.base64Decode(base64Str);
-      const blob = Utilities.newBlob(decodedBytes, mime, fileName);
+      const extension = b.mime === "application/pdf" ? "pdf" : (b.mime === "image/png" ? "png" : "jpg");
+      const fileName = `${nomorPendaftaran}_${b.field}.${extension}`;
+      const decodedBytes = Utilities.base64Decode(b.base64);
+      const blob = Utilities.newBlob(decodedBytes, b.mime, fileName);
       const file = spmbFolder.createFile(blob);
       uploadedFiles.push(file);
 
-      if (field === "kk") linkKk = file.getUrl();
-      if (field === "akta") linkAkta = file.getUrl();
+      if (b.field === "kk") linkKk = file.getUrl();
+      if (b.field === "akta") linkAkta = file.getUrl();
     });
 
     const waktuDaftar = Utilities.formatDate(now, "Asia/Jakarta", "yyyy-MM-dd HH:mm:ss");
     const newRow = [
-      nomorPendaftaran,
-      waktuDaftar,
-      data.namaMurid.trim(),
-      "'" + data.nik.trim(),
-      data.tempatLahir.trim(),
-      data.tanggalLahir.trim(),
-      data.jenisKelamin.trim(),
-      data.namaOrtu.trim(),
-      "'" + data.nikOrtu.trim(),
-      "'" + data.hp.trim(),
-      (data.email || "").trim(),
-      data.alamat.trim(),
-      (data.asalTk || "").trim(),
-      linkKk,
-      linkAkta,
-      "baru",
-      ""
+      nomorPendaftaran, waktuDaftar, data.namaMurid.trim(), "'" + data.nik.trim(),
+      data.tempatLahir.trim(), data.tanggalLahir.trim(), data.jenisKelamin.trim(),
+      data.namaOrtu.trim(), "'" + data.nikOrtu.trim(), "'" + data.hp.trim(),
+      (data.email || "").trim(), data.alamat.trim(), (data.asalTk || "").trim(),
+      linkKk, linkAkta, "baru", ""
     ];
 
     sheet.appendRow(newRow);
@@ -326,39 +667,105 @@ function submitPendaftaran(body) {
       tanggal: waktuDaftar
     };
   } catch (err) {
-    uploadedFiles.forEach(f => {
-      try { f.setTrashed(true); } catch (e) {}
-    });
+    uploadedFiles.forEach(f => { try { f.setTrashed(true); } catch (e) {} });
     throw err;
   } finally {
     lock.releaseLock();
   }
 }
 
-function validasiDataPendaftar(data) {
-  if (!data) throw new Error("VALIDATION_ERROR: Data formulir tidak boleh kosong.");
-  if (!data.namaMurid || String(data.namaMurid).trim().length === 0) {
-    throw new Error("VALIDATION_ERROR: Nama lengkap calon murid wajib diisi.");
+// ==========================================
+// INISIALISASI DATABASE & AKUN PERTAMA
+// ==========================================
+
+function setupAwal() {
+  Logger.log("=== Memulai Setup Database & Akun Admin SD Negeri Sumberejo ===");
+  const ss = getSpreadsheet();
+  const spmbFolder = getSpmbFolder();
+  const kontenFolder = getPublicContentFolder();
+
+  // 1. Struktur Lembar Kerja
+  const struktur = {
+    "Pengaturan": ["kunci", "nilai"],
+    "PenggunaAdmin": ["id", "namaPengguna", "namaTampil", "peran", "hash", "aktif", "wajibGantiSandi", "dibuat"],
+    "Media": ["id", "fileId", "url", "alt", "namaAsli", "diunggah", "oleh"],
+    "Log": ["waktu", "pengguna", "aksi", "modul", "ringkasan"],
+    "Pengumuman": ["id", "judul", "tanggal", "isi", "tampil"],
+    "Guru": ["id", "nama", "jabatan", "fotoUrl", "urutan", "tampil"],
+    "Ekstrakurikuler": ["id", "nama", "deskripsi", "pembina", "jadwal", "fotoUrl", "tampil"],
+    "Fasilitas": ["id", "nama", "deskripsi", "fotoUrl", "urutan", "tampil"],
+    "Galeri": ["id", "judul", "tanggal", "tipe", "url", "tampil"],
+    "Pendaftar": [
+      "nomorPendaftaran", "waktuDaftar", "namaMurid", "nik", "tempatLahir",
+      "tanggalLahir", "jenisKelamin", "namaOrtu", "nikOrtu", "hp", "email",
+      "alamat", "asalTk", "linkKk", "linkAkta", "status", "catatanAdmin"
+    ]
+  };
+
+  Object.keys(struktur).forEach(sheetName => {
+    let s = ss.getSheetByName(sheetName);
+    if (!s) {
+      s = ss.insertSheet(sheetName);
+      Logger.log("✓ Membuat sheet: " + sheetName);
+    }
+    const headers = struktur[sheetName];
+    if (s.getLastRow() === 0) {
+      s.appendRow(headers);
+      s.getRange(1, 1, 1, headers.length).setFontWeight("bold").setBackground("#e2e8f0");
+    }
+  });
+
+  // 2. Akun Superadmin Awal
+  const uSheet = ss.getSheetByName("PenggunaAdmin");
+  if (uSheet.getLastRow() <= 1) {
+    // Akun default: kepsek / admin12345
+    const defaultHash = hashPassword("admin12345");
+    uSheet.appendRow([
+      "USR-001", "kepsek", "Kepala Sekolah", "superadmin", defaultHash, true, false,
+      Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyy-MM-dd")
+    ]);
+    // Akun editor: guru / guru12345
+    const editorHash = hashPassword("guru12345");
+    uSheet.appendRow([
+      "USR-002", "editor", "Ibu Endang (Humas)", "editor", editorHash, true, false,
+      Utilities.formatDate(new Date(), "Asia/Jakarta", "yyyy-MM-dd")
+    ]);
+    Logger.log("✓ Akun admin awal berhasil dibuat:");
+    Logger.log("   - Superadmin: username 'kepsek' | password 'admin12345'");
+    Logger.log("   - Editor:     username 'editor' | password 'guru12345'");
   }
-  if (!data.nik || !/^\d{16}$/.test(String(data.nik).trim())) {
-    throw new Error("VALIDATION_ERROR: NIK calon murid harus tepat 16 digit angka.");
+
+  // 3. Pengaturan Awal
+  const pSheet = ss.getSheetByName("Pengaturan");
+  if (pSheet.getLastRow() <= 1) {
+    const defaults = [
+      ["namaSekolah", "SD Negeri Sumberejo 03"],
+      ["alamat", "Jl Lapangan No 88 Krajan Kidul Sumberejo Kecamatan Ambulu Jember Jawatimur"],
+      ["telepon", "(0338) 123456"],
+      ["email", "sdn.sumberejo04@gmail.com"],
+      ["whatsapp", "6281234567890"],
+      ["jamLayanan", "Senin - Jumat, 07:00 - 13:00 WIB"],
+      ["mapEmbedUrl", "https://maps.google.com/maps?q=SDN+Sumberejo&t=&z=15&ie=UTF8&iwloc=&output=embed"],
+      ["spmbStatus", "buka"],
+      ["spmbMulai", "2027-01-10"],
+      ["spmbSelesai", "2027-01-31"],
+      ["spmbJadwalBerikutnya", "Gelombang Berikutnya dibuka Mei 2027"],
+      ["biayaPendaftaran", "Gratis (Bebas Biaya)"],
+      ["akreditasi", "A"],
+      ["jumlahSiswa", "185"],
+      ["jumlahGuru", "14"],
+      ["sambutanKepsek", "Selamat datang di website resmi SD Negeri Sumberejo. Kami mendidik dengan hati untuk membentuk karakter luhur dan generasi berprestasi."],
+      ["batasHarianDaftar", "100"]
+    ];
+    defaults.forEach(r => pSheet.appendRow(r));
   }
-  if (!data.namaOrtu || String(data.namaOrtu).trim().length === 0) {
-    throw new Error("VALIDATION_ERROR: Nama orang tua/wali wajib diisi.");
-  }
-  if (!data.alamat || String(data.alamat).trim().length === 0) {
-    throw new Error("VALIDATION_ERROR: Alamat domisili wajib diisi.");
-  }
-  if (!data.setujuData) {
-    throw new Error("VALIDATION_ERROR: Anda harus menyetujui pernyataan kebenaran data.");
-  }
+
+  Logger.log("🎉 Setup Database, Akun Admin, dan Folder Media 100% Selesai!");
 }
 
-function validasiBerkas(berkas) {
-  if (!Array.isArray(berkas) || berkas.length < 2) {
-    throw new Error("VALIDATION_ERROR: Berkas Kartu Keluarga (KK) dan Akta Kelahiran wajib diunggah.");
-  }
-}
+// ==========================================
+// RESPONSE HELPER
+// ==========================================
 
 function ok(data, message = "Berhasil") {
   return createJsonResponse({

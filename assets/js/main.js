@@ -251,106 +251,166 @@ function initPageSpecific() {
 // ------------------------------------------
 // Beranda (index.html)
 // ------------------------------------------
-async function initHomePage() {
-  const pengumumanContainer = document.getElementById("pengumumanContainer");
-  if (!pengumumanContainer) return;
+function renderPengumumanCards(container, list) {
+  if (!list || list.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada pengumuman terbaru.</div>`;
+    return;
+  }
+  container.innerHTML = list
+    .map(
+      (item) => `
+    <article class="card">
+      <div class="card-body">
+        <div class="card-meta">
+          <span>📅 ${formatDateId(item.tanggal)}</span>
+        </div>
+        <h3 class="card-title">${escapeHtml(item.judul)}</h3>
+        <p>${escapeHtml(item.isi)}</p>
+      </div>
+    </article>
+  `
+    )
+    .join("");
+  triggerHomyzReveal();
+}
 
+async function initHomePage() {
+  const container = document.getElementById("pengumumanContainer");
+  if (!container) return;
+
+  // 1. Tampilkan instan (0 ms) dari cache lokal jika ada
+  try {
+    const cached = localStorage.getItem("sdn_pengumuman_list");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        renderPengumumanCards(container, parsed);
+      }
+    }
+  } catch (e) {}
+
+  // 2. Sinkronkan data segar dari server di latar belakang
   try {
     const list = await SchoolAPI.get("getPengumuman", { limit: 3 });
-    if (list && list.length > 0) {
-      pengumumanContainer.innerHTML = list
-        .map(
-          (item) => `
-        <article class="card">
-          <div class="card-body">
-            <div class="card-meta">
-              <span>📅 ${formatDateId(item.tanggal)}</span>
-            </div>
-            <h3 class="card-title">${escapeHtml(item.judul)}</h3>
-            <p>${escapeHtml(item.isi)}</p>
-          </div>
-        </article>
-      `
-        )
-        .join("");
-      triggerHomyzReveal();
+    if (list && Array.isArray(list)) {
+      localStorage.setItem("sdn_pengumuman_list", JSON.stringify(list));
+      renderPengumumanCards(container, list);
     }
   } catch (e) {
-    // Biarkan pengumuman bawaan HTML tetap tampil
+    console.warn("Gagal menyinkronkan pengumuman terbaru.");
   }
 }
 
 // ------------------------------------------
 // Direktori Guru (guru.html)
 // ------------------------------------------
+function renderGuruCards(container, list) {
+  if (!list || list.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">Belum ada data guru.</div>`;
+    return;
+  }
+  container.innerHTML = list
+    .map((guru) => {
+      const formattedUrl = formatPhotoUrl(guru.fotoUrl);
+      const driveId = extractDriveId(guru.fotoUrl);
+
+      const photoHtml = formattedUrl
+        ? `<div class="guru-photo-wrap">
+             <img src="${escapeHtml(formattedUrl)}" 
+                  alt="${escapeHtml(guru.nama)}" 
+                  class="guru-photo" 
+                  loading="lazy" 
+                  referrerpolicy="no-referrer"
+                  onerror="this.onerror=null; ${driveId ? `this.src='https://lh3.googleusercontent.com/d/${driveId}'; this.onerror=function(){this.parentElement.outerHTML=getDefaultAvatarHtml('${escapeHtml(guru.nama)}');};` : `this.parentElement.outerHTML=getDefaultAvatarHtml('${escapeHtml(guru.nama)}');`}">
+           </div>`
+        : getDefaultAvatarHtml(guru.nama);
+
+      return `
+      <div class="card guru-card">
+        ${photoHtml}
+        <div class="guru-card-body">
+          <h3 class="guru-name">${escapeHtml(guru.nama)}</h3>
+          <span class="guru-role-badge">${escapeHtml(guru.jabatan)}</span>
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+  triggerHomyzReveal();
+}
+
 async function initGuruPage() {
   const container = document.getElementById("guruContainer");
   if (!container) return;
 
+  // 1. Tampilkan instan (0 ms) dari cache lokal jika ada
+  try {
+    const cached = localStorage.getItem("sdn_guru_list");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        renderGuruCards(container, parsed);
+      }
+    }
+  } catch (e) {}
+
+  // 2. Sinkronkan data segar dari server di latar belakang
   try {
     const list = await SchoolAPI.get("getGuru");
-    if (list && list.length > 0) {
-      container.innerHTML = list
-        .map((guru) => {
-          const formattedUrl = formatPhotoUrl(guru.fotoUrl);
-          const driveId = extractDriveId(guru.fotoUrl);
-
-          const photoHtml = formattedUrl
-            ? `<div class="guru-photo-wrap">
-                 <img src="${escapeHtml(formattedUrl)}" 
-                      alt="${escapeHtml(guru.nama)}" 
-                      class="guru-photo" 
-                      loading="lazy" 
-                      referrerpolicy="no-referrer"
-                      onerror="this.onerror=null; ${driveId ? `this.src='https://lh3.googleusercontent.com/d/${driveId}'; this.onerror=function(){this.parentElement.outerHTML=getDefaultAvatarHtml('${escapeHtml(guru.nama)}');};` : `this.parentElement.outerHTML=getDefaultAvatarHtml('${escapeHtml(guru.nama)}');`}">
-               </div>`
-            : getDefaultAvatarHtml(guru.nama);
-
-          return `
-          <div class="card guru-card">
-            ${photoHtml}
-            <div class="guru-card-body">
-              <h3 class="guru-name">${escapeHtml(guru.nama)}</h3>
-              <span class="guru-role-badge">${escapeHtml(guru.jabatan)}</span>
-            </div>
-          </div>
-        `;
-        })
-        .join("");
-      triggerHomyzReveal();
+    if (list && Array.isArray(list)) {
+      localStorage.setItem("sdn_guru_list", JSON.stringify(list));
+      renderGuruCards(container, list);
     }
   } catch (e) {
-    console.warn("Gagal memuat guru dari API, mempertahankan konten default.");
+    console.warn("Gagal memuat guru terbaru.");
   }
 }
 
 // ------------------------------------------
 // Program & Ekstrakurikuler (program.html)
 // ------------------------------------------
+function renderEkskulCards(container, list) {
+  if (!list || list.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">Belum ada program ekstrakurikuler.</div>`;
+    return;
+  }
+  container.innerHTML = list
+    .map(
+      (item) => `
+    <div class="card">
+      ${item.fotoUrl ? `<img src="${formatPhotoUrl(item.fotoUrl)}" alt="${escapeHtml(item.nama)}" class="card-img" referrerpolicy="no-referrer">` : ""}
+      <div class="card-body">
+        <h3 class="card-title" style="color: var(--primary);">${escapeHtml(item.nama)}</h3>
+        <p>${escapeHtml(item.deskripsi)}</p>
+        <div class="card-footer" style="font-size: 0.88rem; color: var(--text-muted);">
+          <div><strong>Pembina:</strong> ${escapeHtml(item.pembina || "-")}</div>
+          <div><strong>Jadwal:</strong> ${escapeHtml(item.jadwal || "-")}</div>
+        </div>
+      </div>
+    </div>
+  `
+    )
+    .join("");
+  triggerHomyzReveal();
+}
+
 async function initProgramPage() {
   const container = document.getElementById("ekskulContainer");
   if (!container) return;
 
   try {
+    const cached = localStorage.getItem("sdn_ekskul_list");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) renderEkskulCards(container, parsed);
+    }
+  } catch (e) {}
+
+  try {
     const list = await SchoolAPI.get("getEkskul");
-    if (list && list.length > 0) {
-      container.innerHTML = list
-        .map(
-          (item) => `
-        <div class="card">
-          <div class="card-body">
-            <h3 class="card-title" style="color: var(--primary);">${escapeHtml(item.nama)}</h3>
-            <p>${escapeHtml(item.deskripsi)}</p>
-            <div class="card-footer" style="font-size: 0.88rem; color: var(--text-muted);">
-              <div><strong>Pembina:</strong> ${escapeHtml(item.pembina || "-")}</div>
-              <div><strong>Jadwal:</strong> ${escapeHtml(item.jadwal || "-")}</div>
-            </div>
-          </div>
-        </div>
-      `
-        )
-        .join("");
-      triggerHomyzReveal();
+    if (list && Array.isArray(list)) {
+      localStorage.setItem("sdn_ekskul_list", JSON.stringify(list));
+      renderEkskulCards(container, list);
     }
   } catch (e) {
     console.warn("Gagal memuat ekskul dari API.");
@@ -360,31 +420,48 @@ async function initProgramPage() {
 // ------------------------------------------
 // Fasilitas (fasilitas.html)
 // ------------------------------------------
+function renderFasilitasCards(container, list) {
+  if (!list || list.length === 0) {
+    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">Belum ada data fasilitas.</div>`;
+    return;
+  }
+  container.innerHTML = list
+    .map((fasilitas) => {
+      const photoHtml = fasilitas.fotoUrl
+        ? `<img src="${formatPhotoUrl(fasilitas.fotoUrl)}" alt="${escapeHtml(fasilitas.nama)}" class="card-img" referrerpolicy="no-referrer" onerror="this.outerHTML=getDefaultFacilityImgHtml()">`
+        : getDefaultFacilityImgHtml();
+
+      return `
+      <div class="card">
+        ${photoHtml}
+        <div class="card-body">
+          <h3 class="card-title">${escapeHtml(fasilitas.nama)}</h3>
+          <p>${escapeHtml(fasilitas.deskripsi)}</p>
+        </div>
+      </div>
+    `;
+    })
+    .join("");
+  triggerHomyzReveal();
+}
+
 async function initFasilitasPage() {
   const container = document.getElementById("fasilitasContainer");
   if (!container) return;
 
   try {
-    const list = await SchoolAPI.get("getFasilitas");
-    if (list && list.length > 0) {
-      container.innerHTML = list
-        .map((fasilitas) => {
-          const photoHtml = fasilitas.fotoUrl
-            ? `<img src="${escapeHtml(fasilitas.fotoUrl)}" alt="${escapeHtml(fasilitas.nama)}" class="card-img" onerror="this.outerHTML=getDefaultFacilityImgHtml()">`
-            : getDefaultFacilityImgHtml();
+    const cached = localStorage.getItem("sdn_fasilitas_list");
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) renderFasilitasCards(container, parsed);
+    }
+  } catch (e) {}
 
-          return `
-          <div class="card">
-            ${photoHtml}
-            <div class="card-body">
-              <h3 class="card-title">${escapeHtml(fasilitas.nama)}</h3>
-              <p>${escapeHtml(fasilitas.deskripsi)}</p>
-            </div>
-          </div>
-        `;
-        })
-        .join("");
-      triggerHomyzReveal();
+  try {
+    const list = await SchoolAPI.get("getFasilitas");
+    if (list && Array.isArray(list)) {
+      localStorage.setItem("sdn_fasilitas_list", JSON.stringify(list));
+      renderFasilitasCards(container, list);
     }
   } catch (e) {
     console.warn("Gagal memuat fasilitas dari API.");

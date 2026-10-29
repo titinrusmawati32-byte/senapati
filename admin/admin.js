@@ -663,6 +663,19 @@
   }
 
   function renderCollectionTable(sheetName, items) {
+    // Sinkronkan ke cache browser agar website publik langsung membaca data ini dalam 0 ms
+    const keyMap = {
+      Pengumuman: "sdn_pengumuman_list",
+      Guru: "sdn_guru_list",
+      Ekstrakurikuler: "sdn_ekskul_list",
+      Fasilitas: "sdn_fasilitas_list",
+      Galeri: "sdn_galeri_list"
+    };
+    if (keyMap[sheetName]) {
+      const publicItems = (items || []).filter((x) => x.tampil === true || String(x.tampil).toUpperCase() === "TRUE");
+      localStorage.setItem(keyMap[sheetName], JSON.stringify(publicItems));
+    }
+
     const tableIds = {
       Pengumuman: "tablePengumumanBody",
       Guru: "tableGuruBody",

@@ -1215,10 +1215,15 @@
     dataObj.tampil = form.querySelector("input[name='tampil']").checked;
 
     try {
-      await apiCall("admin_saveRow", {
+      const saveRes = await apiCall("admin_saveRow", {
         sheetName: sheetName,
         data: dataObj
       });
+
+      const savedId = (saveRes && saveRes.id) || dataObj.id;
+      if (sheetName === "Pengumuman" && savedId && photoVal) {
+        localStorage.setItem("sdn_photo_" + savedId, photoVal);
+      }
 
       showToast(`Data ${sheetName} berhasil disimpan!`, "success");
       AppCollections.closeModal();

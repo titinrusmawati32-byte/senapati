@@ -236,7 +236,7 @@
           <!-- Card 1: Peringatan Hari Sumpah Pemuda -->
           <article class="pengumuman-card is-revealed">
             <div class="pengumuman-thumb-wrap">
-              <img src="assets/img/pengumuman-sumpah-pemuda.svg" alt="PERINGATAN HARI SUMPAH PEMUDA" class="pengumuman-thumb" loading="lazy" referrerpolicy="no-referrer">
+              <img src="assets/img/pengumuman-sumpah-pemuda.svg" alt="PERINGATAN HARI SUMPAH PEMUDA" class="pengumuman-thumb" loading="lazy" referrerpolicy="no-referrer" onload="handlePhotoAspect(this)">
             </div>
             <div class="pengumuman-card-content">
               <div class="pengumuman-meta-row">
@@ -261,7 +261,7 @@
           <!-- Card 2: Jadwal Penilaian Tengah Semester (PTS) -->
           <article class="pengumuman-card is-revealed">
             <div class="pengumuman-thumb-wrap">
-              <img src="assets/img/pengumuman-pts.svg" alt="Jadwal Penilaian Tengah Semester (PTS)" class="pengumuman-thumb" loading="lazy" referrerpolicy="no-referrer">
+              <img src="assets/img/pengumuman-pts.svg" alt="Jadwal Penilaian Tengah Semester (PTS)" class="pengumuman-thumb" loading="lazy" referrerpolicy="no-referrer" onload="handlePhotoAspect(this)">
             </div>
             <div class="pengumuman-card-content">
               <div class="pengumuman-meta-row">
@@ -286,7 +286,7 @@
           <!-- Card 3: Rapat Orang Tua Wali Murid -->
           <article class="pengumuman-card is-revealed">
             <div class="pengumuman-thumb-wrap">
-              <img src="assets/img/pengumuman-rapat-ortu.svg" alt="Rapat Orang Tua Wali Murid" class="pengumuman-thumb" loading="lazy" referrerpolicy="no-referrer">
+              <img src="assets/img/pengumuman-rapat-ortu.svg" alt="Rapat Orang Tua Wali Murid" class="pengumuman-thumb" loading="lazy" referrerpolicy="no-referrer" onload="handlePhotoAspect(this)">
             </div>
             <div class="pengumuman-card-content">
               <div class="pengumuman-meta-row">
@@ -342,7 +342,7 @@
               <span style="font-size: 2rem;">🎯</span>
               <h3 style="margin: 0; color: var(--primary-dark);">Visi Sekolah</h3>
             </div>
-            <p style="font-size: 1.25rem; font-weight: 600; color: var(--primary); line-height: 1.5; margin: 0;">
+            <p style="font-size: 1.25rem; font-weight: 600; color: var(--primary); line-height: 1.5; margin: 0;" data-config="visiTeks">
               "Terwujudnya Peserta Didik yang Beriman dan Bertakwa, Berakhlak Mulia, Cerdas, Berprestasi, Mandiri, serta Berwawasan Lingkungan Hidup."
             </p>
           </div>
@@ -352,13 +352,26 @@
               <span style="font-size: 2rem;">🚀</span>
               <h3 style="margin: 0; color: var(--primary-dark);">Misi Sekolah</h3>
             </div>
-            <ol style="padding-left: 1.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-size: 1.05rem;">
-              <li>Menumbuhkembangkan penghayatan dan pengamalan nilai-nilai keagamaan dalam kehidupan sehari-hari di lingkungan sekolah.</li>
-              <li>Menyelenggarakan proses pembelajaran yang inovatif, kreatif, efektif, menyenangkan, dan berpusat pada murid (Student-Centered Learning).</li>
-              <li>Mendorong dan memfasilitasi minat, bakat, serta potensi siswa melalui kegiatan akademik dan ekstrakurikuler yang terarah.</li>
-              <li>Membentuk karakter disiplin, sopan santun, gotong royong, dan cinta tanah air sesuai nilai-nilai Profil Pelajar Pancasila.</li>
-              <li>Menciptakan budaya sekolah yang bersih, sehat, rindang, ramah anak, dan peduli terhadap kelestarian lingkungan.</li>
-            </ol>
+            <div data-config="misiTeks">
+              <ol style="padding-left: 1.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-size: 1.05rem;">
+                <li>Menumbuhkembangkan penghayatan dan pengamalan nilai-nilai keagamaan dalam kehidupan sehari-hari di lingkungan sekolah.</li>
+                <li>Menyelenggarakan proses pembelajaran yang inovatif, kreatif, efektif, menyenangkan, dan berpusat pada murid (Student-Centered Learning).</li>
+                <li>Mendorong dan memfasilitasi minat, bakat, serta potensi siswa melalui kegiatan akademik dan ekstrakurikuler yang terarah.</li>
+                <li>Membentuk karakter disiplin, sopan santun, gotong royong, dan cinta tanah air sesuai nilai-nilai Profil Pelajar Pancasila.</li>
+                <li>Menciptakan budaya sekolah yang bersih, sehat, rindang, ramah anak, dan peduli terhadap kelestarian lingkungan.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sejarah Singkat Sekolah (Tersinkron CMS) -->
+        <div style="background: #ffffff; padding: 2.25rem; border-radius: var(--radius-lg); border-left: 5px solid var(--secondary); box-shadow: var(--shadow-sm); margin-bottom: 2.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <span style="font-size: 2rem;">📜</span>
+            <h3 style="margin: 0; color: var(--primary-dark);">Sejarah Singkat Sekolah</h3>
+          </div>
+          <div style="font-size: 1.02rem; line-height: 1.8; color: var(--text-main);" data-config="sejarahTeks">
+            SD Negeri Sumberejo 04 didirikan atas prakarsa tokoh masyarakat dan pemerintah daerah untuk memperluas akses pendidikan berkualitas bagi anak-anak di Krajan Kidul Sumberejo, Ambulu, Jember. Sejak berdirinya hingga saat ini, sekolah terus bertransformasi mengadopsi pembelajaran modern, fasilitas memadai, dan pembinaan karakter berbudi pekerti luhur.
           </div>
         </div>
 

@@ -255,6 +255,27 @@ function applyConfigToDom(config) {
         el.textContent = config[key];
       } else if (el.tagName === "IFRAME" && key === "mapEmbedUrl") {
         el.src = config[key];
+      } else if (key === "misiTeks") {
+        const raw = String(config[key]).trim();
+        const lines = raw.split("\n").map((l) => l.replace(/^[-*•\d.]+\s*/, "").trim()).filter(Boolean);
+        if (lines.length > 0) {
+          el.innerHTML = `<ol style="padding-left: 1.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-size: 1.05rem;">${lines.map((l) => `<li>${escapeHtml(l)}</li>`).join("")}</ol>`;
+        } else {
+          el.textContent = raw;
+        }
+      } else if (key === "sejarahTeks") {
+        const raw = String(config[key]).trim();
+        const paragraphs = raw.split("\n").map((p) => p.trim()).filter(Boolean);
+        if (paragraphs.length > 1) {
+          el.innerHTML = paragraphs.map((p) => `<p style="margin-bottom: 0.85rem; line-height: 1.8;">${escapeHtml(p)}</p>`).join("");
+        } else {
+          el.textContent = raw;
+        }
+      } else if (key === "sambutanKepsek") {
+        const raw = String(config[key]).trim();
+        el.innerHTML = `"${escapeHtml(raw)}"`;
+      } else if (key === "spmbMulai" || key === "spmbSelesai") {
+        el.textContent = formatDateId(config[key]);
       } else {
         el.textContent = config[key];
       }
@@ -477,6 +498,29 @@ function normalizePengumumanList(rawList) {
   return processed;
 }
 
+function handlePhotoAspect(img) {
+  if (!img) return;
+  const setAspect = () => {
+    if (!img.naturalWidth || !img.naturalHeight) return;
+    const wrap = img.closest(".pengumuman-thumb-wrap") || img.closest(".card-img-wrap") || img.parentElement;
+    if (!wrap) return;
+    if (img.naturalHeight > img.naturalWidth * 1.05) {
+      wrap.classList.add("is-portrait");
+      wrap.classList.remove("is-landscape");
+    } else {
+      wrap.classList.add("is-landscape");
+      wrap.classList.remove("is-portrait");
+    }
+  };
+
+  if (img.complete && img.naturalWidth > 0) {
+    setAspect();
+  } else {
+    img.addEventListener("load", setAspect, { once: true });
+  }
+}
+window.handlePhotoAspect = handlePhotoAspect;
+
 function renderPengumumanCards(container, list) {
   const items = normalizePengumumanList(list);
   currentAllPengumumanList = items;
@@ -497,6 +541,7 @@ function renderPengumumanCards(container, list) {
              class="pengumuman-thumb" 
              loading="lazy" 
              referrerpolicy="no-referrer"
+             onload="handlePhotoAspect(this)"
              onerror="handleThumbError(this, '${driveId || ''}', '${fallbackSvg}')">
       </div>
       <div class="pengumuman-card-content">
@@ -523,6 +568,7 @@ function renderPengumumanCards(container, list) {
     )
     .join("");
 
+  container.querySelectorAll("img.pengumuman-thumb").forEach(handlePhotoAspect);
   triggerHomyzReveal();
 }
 
@@ -544,8 +590,8 @@ function openPengumumanModal(id) {
   const modalFallbackSvg = item.fallbackSvg || "assets/img/pengumuman-sumpah-pemuda.svg";
 
   content.innerHTML = `
-    <div style="border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem; max-height: 280px; background: #0f172a;">
-      <img src="${escapeHtml(item.bannerUrl)}" alt="${escapeHtml(item.judul)}" style="width: 100%; height: 100%; object-fit: cover; display: block;" loading="lazy" referrerpolicy="no-referrer" onerror="handleThumbError(this, '${modalDriveId || ''}', '${modalFallbackSvg}')">
+    <div style="border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem; max-height: 420px; background: #0f172a; display: flex; align-items: center; justify-content: center;">
+      <img src="${escapeHtml(item.bannerUrl)}" alt="${escapeHtml(item.judul)}" style="max-width: 100%; max-height: 420px; width: auto; height: auto; object-fit: contain; display: block; margin: 0 auto;" loading="lazy" referrerpolicy="no-referrer" onerror="handleThumbError(this, '${modalDriveId || ''}', '${modalFallbackSvg}')">
     </div>
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
       <span class="pengumuman-date" style="font-size: 0.9rem;">
@@ -590,8 +636,8 @@ function openAllPengumumanModal() {
         const fallbackSvg = item.fallbackSvg || "assets/img/pengumuman-sumpah-pemuda.svg";
         return `
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem; display: flex; gap: 1rem; align-items: center; transition: all 0.2s ease;">
-      <div style="width: 80px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #0f172a;">
-        <img src="${escapeHtml(item.bannerUrl)}" alt="${escapeHtml(item.judul)}" style="width: 100%; height: 100%; object-fit: cover;" loading="lazy" referrerpolicy="no-referrer" onerror="handleThumbError(this, '${driveId || ''}', '${fallbackSvg}')">
+      <div style="width: 80px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #0f172a; display: flex; align-items: center; justify-content: center;">
+        <img src="${escapeHtml(item.bannerUrl)}" alt="${escapeHtml(item.judul)}" style="max-width: 100%; max-height: 100%; object-fit: contain;" loading="lazy" referrerpolicy="no-referrer" onerror="handleThumbError(this, '${driveId || ''}', '${fallbackSvg}')">
       </div>
       <div style="flex: 1; min-width: 0;">
         <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
@@ -657,6 +703,7 @@ async function initHomePage() {
   initGuruPage();
   initProgramPage();
   initFasilitasPage();
+  initSpmbPage();
 }
 
 // ------------------------------------------
@@ -679,6 +726,7 @@ function renderGuruCards(container, list) {
                   class="guru-photo" 
                   loading="lazy" 
                   referrerpolicy="no-referrer"
+                  onload="handlePhotoAspect(this)"
                   onerror="this.onerror=null; ${driveId ? `this.src='https://lh3.googleusercontent.com/d/${driveId}'; this.onerror=function(){this.parentElement.outerHTML=getDefaultAvatarHtml('${escapeHtml(guru.nama)}');};` : `this.parentElement.outerHTML=getDefaultAvatarHtml('${escapeHtml(guru.nama)}');`}">
            </div>`
         : getDefaultAvatarHtml(guru.nama);
@@ -694,6 +742,8 @@ function renderGuruCards(container, list) {
     `;
     })
     .join("");
+
+  container.querySelectorAll("img.guru-photo").forEach(handlePhotoAspect);
   triggerHomyzReveal();
 }
 
@@ -736,7 +786,7 @@ function renderEkskulCards(container, list) {
     .map(
       (item) => `
     <div class="card">
-      ${item.fotoUrl ? `<img src="${formatPhotoUrl(item.fotoUrl)}" alt="${escapeHtml(item.nama)}" class="card-img" referrerpolicy="no-referrer">` : ""}
+      ${item.fotoUrl ? `<div class="card-img-wrap"><img src="${formatPhotoUrl(item.fotoUrl)}" alt="${escapeHtml(item.nama)}" class="card-img" referrerpolicy="no-referrer" onload="handlePhotoAspect(this)"></div>` : ""}
       <div class="card-body">
         <h3 class="card-title" style="color: var(--primary);">${escapeHtml(item.nama)}</h3>
         <p>${escapeHtml(item.deskripsi)}</p>
@@ -749,6 +799,8 @@ function renderEkskulCards(container, list) {
   `
     )
     .join("");
+
+  container.querySelectorAll("img.card-img").forEach(handlePhotoAspect);
   triggerHomyzReveal();
 }
 
@@ -786,7 +838,7 @@ function renderFasilitasCards(container, list) {
   container.innerHTML = list
     .map((fasilitas) => {
       const photoHtml = fasilitas.fotoUrl
-        ? `<img src="${formatPhotoUrl(fasilitas.fotoUrl)}" alt="${escapeHtml(fasilitas.nama)}" class="card-img" referrerpolicy="no-referrer" onerror="this.outerHTML=getDefaultFacilityImgHtml()">`
+        ? `<div class="card-img-wrap"><img src="${formatPhotoUrl(fasilitas.fotoUrl)}" alt="${escapeHtml(fasilitas.nama)}" class="card-img" referrerpolicy="no-referrer" onload="handlePhotoAspect(this)" onerror="this.outerHTML=getDefaultFacilityImgHtml()"></div>`
         : getDefaultFacilityImgHtml();
 
       return `
@@ -800,6 +852,8 @@ function renderFasilitasCards(container, list) {
     `;
     })
     .join("");
+
+  container.querySelectorAll("img.card-img").forEach(handlePhotoAspect);
   triggerHomyzReveal();
 }
 

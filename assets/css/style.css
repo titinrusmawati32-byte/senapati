@@ -719,14 +719,34 @@ a:hover { color: var(--primary-hover); }
   box-shadow: var(--shadow-md);
 }
 
-.card-img {
+.card-img-wrap {
   width: 100%;
-  height: 200px;
-  object-fit: cover;
-  background-color: var(--primary-light);
+  height: 220px;
+  background: #f1f5f9;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-bottom: 1px solid var(--border-color);
+  transition: height 0.35s ease;
+}
+
+.card-img-wrap.is-portrait {
+  height: 320px;
+}
+
+.card-img, img.card-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain !important;
+  object-position: center;
+  background-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.5s ease;
 }
 
 .card-body {
@@ -900,25 +920,43 @@ a:hover { color: var(--primary-hover); }
 
 .pengumuman-thumb-wrap {
   width: 100%;
-  height: 195px;
+  height: 220px;
+  min-height: 200px;
   border-radius: 14px;
   overflow: hidden;
-  background: #0f172a;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   position: relative;
   margin-bottom: 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: height 0.35s ease, min-height 0.35s ease;
+}
+
+/* Penyesuaian Foto Potrait: Memanjang ke bawah tanpa terpotong */
+.pengumuman-thumb-wrap.is-portrait {
+  height: 340px;
+  min-height: 340px;
+}
+
+/* Penyesuaian Foto Landscape: Lebar proporsional tanpa terpotong */
+.pengumuman-thumb-wrap.is-landscape {
+  height: 220px;
 }
 
 .pengumuman-thumb {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain !important;
   object-position: center;
   display: block;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pengumuman-card:hover .pengumuman-thumb {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .pengumuman-card-content {
@@ -1726,7 +1764,7 @@ a:hover { color: var(--primary-hover); }
 
 .guru-photo-wrap {
   width: 100%;
-  height: 310px;
+  height: 320px;
   position: relative;
   overflow: hidden;
   background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
@@ -1736,10 +1774,12 @@ a:hover { color: var(--primary-hover); }
 }
 
 .guru-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain !important;
+  object-position: center;
   display: block;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }

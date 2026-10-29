@@ -122,7 +122,7 @@ function initAnimatedCounters() {
 }
 
 // ==========================================
-// 2. NAVIGASI & MENU MOBILE
+// 2. NAVIGASI, MENU MOBILE & SCROLLSPY GANDA
 // ==========================================
 function initNavigation() {
   const toggleBtn = document.getElementById("navToggle");
@@ -143,15 +143,93 @@ function initNavigation() {
     });
   }
 
-  // Tandai link aktif
-  const currentPath = window.location.pathname.split("/").pop() || "index.html";
   const navLinks = document.querySelectorAll(".nav-link");
+  const isHomePage =
+    window.location.pathname.endsWith("index.html") ||
+    window.location.pathname === "/" ||
+    window.location.pathname.split("/").pop() === "";
+
   navLinks.forEach((link) => {
-    const href = link.getAttribute("href");
-    if (href === currentPath || (currentPath === "" && href === "index.html")) {
-      link.classList.add("active");
-    }
+    link.addEventListener("click", (e) => {
+      const href = link.getAttribute("href") || "";
+      const isAnchor = href.startsWith("#") || (isHomePage && href.includes("#"));
+
+      if (isAnchor) {
+        const targetId = href.startsWith("#") ? href.slice(1) : href.split("#")[1];
+        const targetEl = document.getElementById(targetId);
+
+        if (targetEl) {
+          e.preventDefault();
+          const headerOffset = 80;
+          const elementPosition = targetEl.getBoundingClientRect().top;
+          const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+          });
+
+          navLinks.forEach((l) => l.classList.remove("active"));
+          link.classList.add("active");
+
+          if (toggleBtn && navMenu) {
+            toggleBtn.classList.remove("open");
+            navMenu.classList.remove("open");
+          }
+        }
+      } else {
+        if (toggleBtn && navMenu) {
+          toggleBtn.classList.remove("open");
+          navMenu.classList.remove("open");
+        }
+      }
+    });
   });
+
+  if (isHomePage) {
+    initScrollSpy();
+  } else {
+    const currentPath = window.location.pathname.split("/").pop();
+    navLinks.forEach((link) => {
+      const href = link.getAttribute("href");
+      if (href === currentPath) {
+        link.classList.add("active");
+      }
+    });
+  }
+}
+
+function initScrollSpy() {
+  const sectionIds = ["beranda", "profil", "guru", "program", "fasilitas", "spmb", "kontak"];
+  const sections = sectionIds.map((id) => document.getElementById(id)).filter(Boolean);
+  if (sections.length === 0) return;
+
+  const navLinks = document.querySelectorAll(".nav-menu .nav-link:not(.nav-cta)");
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const activeId = entry.target.getAttribute("id");
+          navLinks.forEach((link) => {
+            const href = link.getAttribute("href") || "";
+            const cleanHref = href.startsWith("#") ? href.slice(1) : href.split("#")[1];
+            if (cleanHref === activeId) {
+              link.classList.add("active");
+            } else {
+              link.classList.remove("active");
+            }
+          });
+        }
+      });
+    },
+    {
+      rootMargin: "-20% 0px -60% 0px",
+      threshold: 0
+    }
+  );
+
+  sections.forEach((sec) => observer.observe(sec));
 }
 
 // ==========================================
@@ -276,29 +354,33 @@ function renderPengumumanCards(container, list) {
 
 async function initHomePage() {
   const container = document.getElementById("pengumumanContainer");
-  if (!container) return;
-
-  // 1. Tampilkan instan (0 ms) dari cache lokal jika ada
-  try {
-    const cached = localStorage.getItem("sdn_pengumuman_list");
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        renderPengumumanCards(container, parsed);
+  if (container) {
+    // 1. Tampilkan instan (0 ms) dari cache lokal jika ada
+    try {
+      const cached = localStorage.getItem("sdn_pengumuman_list");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          renderPengumumanCards(container, parsed);
+        }
       }
-    }
-  } catch (e) {}
+    } catch (e) {}
 
-  // 2. Sinkronkan data segar dari server di latar belakang
-  try {
-    const list = await SchoolAPI.get("getPengumuman", { limit: 3 });
-    if (list && Array.isArray(list)) {
-      localStorage.setItem("sdn_pengumuman_list", JSON.stringify(list));
-      renderPengumumanCards(container, list);
-    }
-  } catch (e) {
-    console.warn("Gagal menyinkronkan pengumuman terbaru.");
+    // 2. Sinkronkan data segar dari server di latar belakang
+    SchoolAPI.get("getPengumuman", { limit: 3 })
+      .then((list) => {
+        if (list && Array.isArray(list)) {
+          localStorage.setItem("sdn_pengumuman_list", JSON.stringify(list));
+          renderPengumumanCards(container, list);
+        }
+      })
+      .catch(() => {});
   }
+
+  // Muat seluruh seksi yang kini ada di Halaman Beranda (Sistem Navigasi Ganda)
+  initGuruPage();
+  initProgramPage();
+  initFasilitasPage();
 }
 
 // ------------------------------------------

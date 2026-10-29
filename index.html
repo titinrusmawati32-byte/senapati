@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SD Negeri Sumberejo 04 - Cerdas, Berkarakter & Berprestasi</title>
-  <meta name="description" content="Situs resmi SD Negeri Sumberejo 04. Informasi profil sekolah, kegiatan ekstrakurikuler, fasilitas, dan pendaftaran murid baru (SPMB) online.">
+  <meta name="description" content="Situs resmi SD Negeri Sumberejo 04. Informasi profil sekolah, dewan guru, program ekstrakurikuler, fasilitas, SPMB, dan kontak.">
   <link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
@@ -23,14 +23,14 @@
     </div>
   </div>
 
-  <!-- Header & Navigasi -->
+  <!-- Header & Navigasi Sticky dengan Sistem Navigasi Ganda -->
   <header class="site-header">
     <div class="container">
       <nav class="navbar">
-        <a href="index.html" class="brand">
+        <a href="#beranda" class="brand">
           <img src="assets/img/logo.svg" alt="Logo SD Negeri Sumberejo 04" class="brand-logo">
           <div class="brand-text">
-            <span class="brand-title" data-config="namaSekolah">SDN SUMBEREJO 03</span>
+            <span class="brand-title" data-config="namaSekolah">SDN SUMBEREJO 04</span>
             <span class="brand-sub">Unggul dalam Prestasi, Santun Berbudi</span>
           </div>
         </a>
@@ -42,13 +42,13 @@
         </button>
 
         <ul class="nav-menu" id="navMenu">
-          <li><a href="index.html" class="nav-link">Beranda</a></li>
-          <li><a href="profil.html" class="nav-link">Profil</a></li>
-          <li><a href="guru.html" class="nav-link">Guru</a></li>
-          <li><a href="program.html" class="nav-link">Program</a></li>
-          <li><a href="fasilitas.html" class="nav-link">Fasilitas</a></li>
-          <li><a href="spmb.html" class="nav-link">SPMB</a></li>
-          <li><a href="kontak.html" class="nav-link">Kontak</a></li>
+          <li><a href="#beranda" class="nav-link active">Beranda</a></li>
+          <li><a href="#profil" class="nav-link">Profil</a></li>
+          <li><a href="#guru" class="nav-link">Guru</a></li>
+          <li><a href="#program" class="nav-link">Program</a></li>
+          <li><a href="#fasilitas" class="nav-link">Fasilitas</a></li>
+          <li><a href="#spmb" class="nav-link">SPMB</a></li>
+          <li><a href="#kontak" class="nav-link">Kontak</a></li>
           <li><a href="daftar.html" class="nav-link nav-cta">Daftar Sekarang</a></li>
         </ul>
       </nav>
@@ -56,8 +56,8 @@
   </header>
 
   <main>
-    <!-- Hero Banner dengan Latar Video Opening -->
-    <section class="hero hero-with-video">
+    <!-- 1. HERO SECTION & STATISTIK (BERANDA) -->
+    <section class="hero hero-with-video" id="beranda">
       <div class="hero-video-wrapper">
         <video autoplay muted loop playsinline class="hero-video-element" id="heroBgVideo">
           <source src="assets/video/opening.mp4" type="video/mp4">
@@ -66,11 +66,11 @@
       </div>
       <div class="container hero-content">
         <div class="hero-badge">✨ Penerimaan Murid Baru Telah Dibuka</div>
-        <h1>Membangun Karakter Luhur & Generasi Berprestasi</h1>
-        <p>Selamat datang di <span data-config="namaSekolah">SD Negeri Sumberejo 03</span>. Kami mendidik dengan hati, memfasilitasi setiap potensi siswa untuk berkembang secara holistik dalam suasana belajar yang menyenangkan dan berkarakter.</p>
+        <h1>Membangun Karakter Luhur &amp; Generasi Berprestasi</h1>
+        <p>Selamat datang di <span data-config="namaSekolah">SD Negeri Sumberejo 04</span>. Kami mendidik dengan hati, memfasilitasi setiap potensi siswa untuk berkembang secara holistik dalam suasana belajar yang menyenangkan dan berkarakter.</p>
         <div class="hero-actions">
           <a href="daftar.html" class="btn btn-secondary">Daftar SPMB Online</a>
-          <a href="profil.html" class="btn btn-outline">Kenali Sekolah Kami</a>
+          <a href="#profil" class="btn btn-outline">Kenali Sekolah Kami</a>
         </div>
       </div>
     </section>
@@ -88,11 +88,11 @@
         </div>
         <div class="stat-card">
           <div class="stat-number" data-config="jumlahGuru">14</div>
-          <div class="stat-label">Guru & Tenaga Ahli</div>
+          <div class="stat-label">Guru &amp; Tenaga Ahli</div>
         </div>
         <div class="stat-card">
           <div class="stat-number" style="color: var(--secondary);">100%</div>
-          <div class="stat-label">Kelulusan & Berkarakter</div>
+          <div class="stat-label">Kelulusan &amp; Berkarakter</div>
         </div>
       </div>
     </section>
@@ -109,7 +109,7 @@
               👨‍🏫
             </div>
             <div>
-              <h3 style="margin-bottom: 0.2rem; font-size: 1.25rem;">Kepala Sekolah <span data-config="namaSekolah">SD Negeri Sumberejo 03</span></h3>
+              <h3 style="margin-bottom: 0.2rem; font-size: 1.25rem;">Kepala Sekolah <span data-config="namaSekolah">SD Negeri Sumberejo 04</span></h3>
               <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Membina dengan Sepenuh Hati untuk Generasi Penerus Bangsa</p>
             </div>
           </div>
@@ -125,7 +125,7 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">Keunggulan Kami</h2>
-          <p class="section-subtitle">Mengapa memilih <span data-config="namaSekolah">SD Negeri Sumberejo 03</span> untuk pendidikan dasar putra-putri tercinta?</p>
+          <p class="section-subtitle">Mengapa memilih <span data-config="namaSekolah">SD Negeri Sumberejo 04</span> untuk pendidikan dasar putra-putri tercinta?</p>
         </div>
         <div class="card-grid tri-col">
           <div class="card">
@@ -145,7 +145,7 @@
           <div class="card">
             <div class="card-body">
               <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🌳</div>
-              <h3 class="card-title">Lingkungan Asri & Aman</h3>
+              <h3 class="card-title">Lingkungan Asri &amp; Aman</h3>
               <p>Suasana belajar yang teduh, nyaman, bersih, serta aman dan kondusif untuk mendukung tumbuh kembang siswa.</p>
             </div>
           </div>
@@ -158,7 +158,7 @@
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">Pengumuman Terbaru</h2>
-          <p class="section-subtitle">Informasi penting, agenda akademik, dan pengumuman sekolah</p>
+          <p class="section-subtitle">Informasi penting, agenda akademik, dan pengumuman resmi sekolah</p>
         </div>
         <div class="card-grid tri-col" id="pengumumanContainer">
           <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2.5rem;">
@@ -168,12 +168,340 @@
       </div>
     </section>
 
-    <!-- Banner Call to Action SPMB -->
-    <section class="section" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: #ffffff; text-align: center;">
+    <!-- 2. PROFIL SEKOLAH (IDENTITAS, VISI & MISI) -->
+    <section class="section section-alt" id="profil">
       <div class="container">
-        <h2 style="color: #ffffff; margin-bottom: 1rem;">Siap Menjadi Bagian dari Keluarga Kami?</h2>
-        <p style="color: #e2e8f0; max-width: 600px; margin: 0 auto 1.75rem;">Proses pendaftaran online mudah, cepat, dan transparan. Tidak dipungut biaya pendaftaran.</p>
-        <a href="daftar.html" class="btn btn-secondary">Daftar Murid Baru Sekarang</a>
+        <div class="section-header">
+          <h2 class="section-title">Profil Sekolah</h2>
+          <p class="section-subtitle">Mengenal lebih dekat identitas, cita-cita luhur, dan komitmen mutu pendidikan di SD Negeri Sumberejo 04</p>
+        </div>
+
+        <!-- Visi & Misi -->
+        <div class="card-grid" style="grid-template-columns: 1fr; gap: 2rem; margin-bottom: 2.5rem;">
+          <div style="background: #ffffff; padding: 2.25rem; border-radius: var(--radius-lg); border-top: 5px solid var(--secondary); box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+              <span style="font-size: 2rem;">🎯</span>
+              <h3 style="margin: 0; color: var(--primary-dark);">Visi Sekolah</h3>
+            </div>
+            <p style="font-size: 1.25rem; font-weight: 600; color: var(--primary); line-height: 1.5; margin: 0;">
+              "Terwujudnya Peserta Didik yang Beriman dan Bertakwa, Berakhlak Mulia, Cerdas, Berprestasi, Mandiri, serta Berwawasan Lingkungan Hidup."
+            </p>
+          </div>
+
+          <div style="background: #ffffff; padding: 2.25rem; border-radius: var(--radius-lg); border-top: 5px solid var(--primary); box-shadow: var(--shadow-sm);">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+              <span style="font-size: 2rem;">🚀</span>
+              <h3 style="margin: 0; color: var(--primary-dark);">Misi Sekolah</h3>
+            </div>
+            <ol style="padding-left: 1.4rem; display: flex; flex-direction: column; gap: 0.85rem; font-size: 1.05rem;">
+              <li>Menumbuhkembangkan penghayatan dan pengamalan nilai-nilai keagamaan dalam kehidupan sehari-hari di lingkungan sekolah.</li>
+              <li>Menyelenggarakan proses pembelajaran yang inovatif, kreatif, efektif, menyenangkan, dan berpusat pada murid (Student-Centered Learning).</li>
+              <li>Mendorong dan memfasilitasi minat, bakat, serta potensi siswa melalui kegiatan akademik dan ekstrakurikuler yang terarah.</li>
+              <li>Membentuk karakter disiplin, sopan santun, gotong royong, dan cinta tanah air sesuai nilai-nilai Profil Pelajar Pancasila.</li>
+              <li>Menciptakan budaya sekolah yang bersih, sehat, rindang, ramah anak, dan peduli terhadap kelestarian lingkungan.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Tabel Identitas Resmi Lembaga -->
+        <div style="background: #ffffff; border-radius: var(--radius-md); border: 1px solid var(--border-color); overflow: hidden; max-width: 850px; margin: 0 auto; box-shadow: var(--shadow-sm);">
+          <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <tbody>
+              <tr style="border-bottom: 1px solid var(--border-color);"><th style="padding: 1rem; width: 35%; background: var(--bg-page); color: var(--text-muted);">Nama Sekolah</th><td style="padding: 1rem; font-weight: 600;" data-config="namaSekolah">SD Negeri Sumberejo 04</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-color);"><th style="padding: 1rem; background: var(--bg-page); color: var(--text-muted);">NPSN</th><td style="padding: 1rem;">20522000</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-color);"><th style="padding: 1rem; background: var(--bg-page); color: var(--text-muted);">Status Akreditasi</th><td style="padding: 1rem;"><span style="background: var(--success-bg); color: var(--success); padding: 0.25rem 0.75rem; border-radius: 999px; font-weight: 700;">Akreditasi A</span> (Unggul)</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-color);"><th style="padding: 1rem; background: var(--bg-page); color: var(--text-muted);">Bentuk Pendidikan</th><td style="padding: 1rem;">Sekolah Dasar (SD)</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-color);"><th style="padding: 1rem; background: var(--bg-page); color: var(--text-muted);">Status Kepemilikan</th><td style="padding: 1rem;">Pemerintah Daerah (Negeri)</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-color);"><th style="padding: 1rem; background: var(--bg-page); color: var(--text-muted);">Alamat Lengkap</th><td style="padding: 1rem;" data-config="alamat">Jl Lapangan No 88 Krajan Kidul Sumberejo Kecamatan Ambulu Jember Jawatimur</td></tr>
+              <tr style="border-bottom: 1px solid var(--border-color);"><th style="padding: 1rem; background: var(--bg-page); color: var(--text-muted);">Kurikulum</th><td style="padding: 1rem;">Kurikulum Merdeka</td></tr>
+              <tr><th style="padding: 1rem; background: var(--bg-page); color: var(--text-muted);">Waktu Belajar</th><td style="padding: 1rem;" data-config="jamLayanan">Pagi (07:00 - 13:00 WIB)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. DEWAN PENDIDIK (GURU) -->
+    <section class="section" id="guru">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Guru &amp; Tenaga Kependidikan</h2>
+          <p class="section-subtitle">Para pendidik profesional yang berdedikasi tinggi, berintegritas, dan penuh kasih dalam membimbing peserta didik</p>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));" id="guruContainer">
+          <div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 3rem;">
+            Memuat data dewan pendidik...
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. PROGRAM & EKSTRAKURIKULER -->
+    <section class="section section-alt" id="program">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Program &amp; Ekstrakurikuler</h2>
+          <p class="section-subtitle">Wadah pengembangan potensi akademik, keterampilan sosial, kepemimpinan, dan minat bakat peserta didik</p>
+        </div>
+
+        <!-- Pembiasaan Karakter -->
+        <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--primary);">Program Pembiasaan Karakter</h3>
+        <div class="card-grid tri-col" style="margin-bottom: 3rem;">
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📖</div>
+              <h3 class="card-title">Gerakan Literasi Sekolah (GLS)</h3>
+              <p>Membaca buku non-pelajaran selama 15 menit sebelum kegiatan belajar mengajar dimulai guna menumbuhkan kecintaan terhadap membaca.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🕌</div>
+              <h3 class="card-title">Sholat Dhuha &amp; Doa Bersama</h3>
+              <p>Pembinaan spiritual rutin setiap pagi untuk menanamkan rasa syukur, ketenangan jiwa, dan ketakwaan sejak usia dini.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🌱</div>
+              <h3 class="card-title">Jumat Bersih &amp; Peduli Lingkungan</h3>
+              <p>Kegiatan gotong royong merawat taman, memilah sampah, dan menjaga kebersihan lingkungan sekolah secara berkala.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ekstrakurikuler Dinamis (Tersinkron CMS) -->
+        <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--primary);">Kegiatan Ekstrakurikuler Pilihan</h3>
+        <div class="card-grid tri-col" id="ekskulContainer">
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title" style="color: var(--primary);">Pramuka (Wajib)</h3>
+              <p>Melatih kemandirian, kedisiplinan, kerjasama tim, kecakapan bertahan hidup di alam, dan jiwa kepemimpinan.</p>
+              <div class="card-footer" style="font-size: 0.88rem; color: var(--text-muted);">
+                <div><strong>Pembina:</strong> Ahmad Rofi'i, S.Pd.SD</div>
+                <div><strong>Jadwal:</strong> Jumat, 13:30 - 15:00 WIB</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title" style="color: var(--primary);">Seni Tari Tradisional</h3>
+              <p>Mengenalkan kekayaan seni budaya Nusantara, melatih kepekaan ritme, kelenturan gerak, dan rasa percaya diri siswa.</p>
+              <div class="card-footer" style="font-size: 0.88rem; color: var(--text-muted);">
+                <div><strong>Pembina:</strong> Endang Sri Wahyuni, S.Pd.</div>
+                <div><strong>Jadwal:</strong> Kamis, 13:30 - 15:00 WIB</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <h3 class="card-title" style="color: var(--primary);">Klub Bulu Tangkis &amp; Olahraga</h3>
+              <p>Mengasah keterampilan fisik, sportivitas, daya tahan tubuh, dan teknik dasar cabang olahraga prestasi.</p>
+              <div class="card-footer" style="font-size: 0.88rem; color: var(--text-muted);">
+                <div><strong>Pembina:</strong> Imam Santoso, S.Pd.</div>
+                <div><strong>Jadwal:</strong> Sabtu, 08:00 - 10:00 WIB</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. FASILITAS & SARANA BELAJAR -->
+    <section class="section" id="fasilitas">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Fasilitas &amp; Sarana Belajar</h2>
+          <p class="section-subtitle">Sarana dan prasarana penunjang kegiatan belajar yang terawat, aman, dan memadai demi kenyamanan peserta didik</p>
+        </div>
+
+        <div class="card-grid tri-col" id="fasilitasContainer">
+          <div class="card">
+            <div class="card-img" style="background: #e2e8f0; color: #1e3a8a; font-size: 3rem;">🏫</div>
+            <div class="card-body">
+              <h3 class="card-title">Ruang Kelas Representatif</h3>
+              <p>Ruang kelas yang luas, ventilasi udara yang baik, pencahayaan alami cukup, serta dilengkapi papan tulis interaktif dan media pembelajaran.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img" style="background: #e2e8f0; color: #1e3a8a; font-size: 3rem;">📚</div>
+            <div class="card-body">
+              <h3 class="card-title">Perpustakaan Ramah Anak</h3>
+              <p>Koleksi ribuan buku cerita, ensiklopedia anak, buku pelajaran tematik, dan area baca beralas karpet yang santai serta nyaman.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img" style="background: #e2e8f0; color: #1e3a8a; font-size: 3rem;">⚽</div>
+            <div class="card-body">
+              <h3 class="card-title">Lapangan Olahraga &amp; Upacara</h3>
+              <p>Lapangan multifungsi beraspal halus untuk kegiatan senam pagi, upacara bendera hari Senin, bulu tangkis, voli, dan futsal mini.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img" style="background: #e2e8f0; color: #1e3a8a; font-size: 3rem;">🏥</div>
+            <div class="card-body">
+              <h3 class="card-title">Ruang UKS (Kesehatan)</h3>
+              <p>Fasilitas pertolongan pertama pada kecelakaan (P3K), tempat tidur istirahat, timbangan badan, alat ukur tinggi badan, dan pengawasan berkala Puskesmas.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img" style="background: #e2e8f0; color: #1e3a8a; font-size: 3rem;">🌳</div>
+            <div class="card-body">
+              <h3 class="card-title">Taman &amp; Halaman Hijau</h3>
+              <p>Taman sekolah yang asri ditanami tanaman hias dan apotek hidup (TOGA), menciptakan udara sejuk sekaligus media belajar sains lingkungan.</p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-img" style="background: #e2e8f0; color: #1e3a8a; font-size: 3rem;">🚰</div>
+            <div class="card-body">
+              <h3 class="card-title">Sanitasi &amp; Toilet Bersih</h3>
+              <p>Toilet terpisah untuk siswa laki-laki, perempuan, dan guru dengan ketersediaan air bersih melimpah serta fasilitas cuci tangan bersabun.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. PENERIMAAN MURID BARU (SPMB) -->
+    <section class="section section-alt" id="spmb">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Penerimaan Murid Baru (SPMB)</h2>
+          <p class="section-subtitle">Informasi lengkap pendaftaran peserta didik baru SD Negeri Sumberejo 04 Tahun Ajaran Baru</p>
+        </div>
+
+        <!-- Status SPMB Alert Dinamis -->
+        <div id="spmbStatusAlert" class="spmb-status-badge alert alert-info" style="margin-bottom: 2rem;">
+          <strong>Status Pendaftaran:</strong> Sedang memeriksa periode pendaftaran dari sistem...
+        </div>
+
+        <div class="card-grid tri-col" style="margin-bottom: 3rem;">
+          <!-- Jadwal -->
+          <div class="card" style="border-top: 4px solid var(--primary);">
+            <div class="card-body">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem;">📅</div>
+              <h3 class="card-title">Jadwal Pendaftaran</h3>
+              <p style="margin-bottom: 0.5rem;">Periode Pendaftaran:</p>
+              <div style="font-weight: 700; color: var(--primary); font-size: 1.1rem; margin-bottom: 0.5rem;">
+                <span data-config="spmbMulai">10 Januari 2027</span> s.d. <span data-config="spmbSelesai">31 Januari 2027</span>
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">Pelayanan verifikasi berkas offline dibuka setiap hari kerja pukul 08:00 - 12:00 WIB.</p>
+            </div>
+          </div>
+
+          <!-- Biaya -->
+          <div class="card" style="border-top: 4px solid var(--secondary);">
+            <div class="card-body">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏷️</div>
+              <h3 class="card-title">Biaya Pendaftaran</h3>
+              <p style="margin-bottom: 0.5rem;">Biaya Registrasi &amp; Formulir:</p>
+              <div style="font-weight: 800; color: var(--success); font-size: 1.35rem; margin-bottom: 0.5rem;" data-config="biayaPendaftaran">
+                GRATIS (Bebas Biaya)
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-muted);">SD Negeri Sumberejo 04 tidak memungut biaya pendaftaran atau uang gedung apa pun.</p>
+            </div>
+          </div>
+
+          <!-- Syarat Usia -->
+          <div class="card" style="border-top: 4px solid var(--primary);">
+            <div class="card-body">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎂</div>
+              <h3 class="card-title">Ketentuan Usia</h3>
+              <ul style="padding-left: 1.25rem; font-size: 0.95rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                <li>Prioritas utama: Berusia <strong>7 tahun</strong> atau lebih.</li>
+                <li>Paling rendah berusia <strong>6 tahun</strong> pada tanggal 1 Juli tahun berjalan.</li>
+                <li>Pengecualian usia 5 tahun 6 bulan disertai surat rekomendasi psikolog/dewan guru.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alur 4 Langkah -->
+        <h3 style="text-align: center; margin-bottom: 1.75rem; color: var(--primary);">Alur Pendaftaran SPMB Online</h3>
+        <div class="steps-grid" style="margin-bottom: 2.5rem;">
+          <div class="step-item">
+            <div class="step-number">1</div>
+            <h4>Pengisian Formulir</h4>
+            <p>Orang tua mengisi data diri calon murid secara lengkap dan valid melalui formulir online.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-number">2</div>
+            <h4>Verifikasi Berkas</h4>
+            <p>Panitia sekolah memverifikasi keabsahan data NIK, Kartu Keluarga, dan Akta Kelahiran.</p>
+          </div>
+          <div class="step-item">
+            <div class="step-number">3</div>
+            <h4>Pengumuman Kelulusan</h4>
+            <p>Pengumuman calon murid yang diterima dapat dilihat secara transparan di situs web ini.</p>
+          </div>
+        </div>
+
+        <div style="text-align: center; background: #ffffff; padding: 2.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); max-width: 700px; margin: 0 auto;">
+          <h3 style="margin-bottom: 0.75rem; color: var(--primary-dark);">Siap Bergabung Bersama Kami?</h3>
+          <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Proses pendaftaran online mudah, cepat, dan tidak dipungut biaya pendaftaran (100% Bebas Biaya).</p>
+          <a href="daftar.html" class="btn btn-secondary" style="font-size: 1.1rem; padding: 0.85rem 2.25rem;">Buka Formulir Pendaftaran Online &rarr;</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. KONTAK & LOKASI -->
+    <section class="section" id="kontak">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Hubungi Kami</h2>
+          <p class="section-subtitle">Silakan berkunjung langsung ke sekolah atau hubungi kami melalui saluran komunikasi resmi di bawah ini</p>
+        </div>
+
+        <div class="card-grid" style="grid-template-columns: 1fr; gap: 2rem;">
+          <!-- Kartu Info Kontak -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+            <div class="card">
+              <div class="card-body">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">📍</div>
+                <h3 class="card-title">Alamat Sekolah</h3>
+                <p data-config="alamat">Jl Lapangan No 88 Krajan Kidul Sumberejo Kecamatan Ambulu Jember Jawatimur</p>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🕒</div>
+                <h3 class="card-title">Jam Pelayanan</h3>
+                <p data-config="jamLayanan">Senin s.d. Jumat<br>Pukul 07.00 - 13.00 WIB</p>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Hari Sabtu, Minggu, &amp; Libur Nasional: Tutup</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <div style="font-size: 2rem; margin-bottom: 0.5rem;">💬</div>
+                <h3 class="card-title">Layanan Pesan Cepat</h3>
+                <p>Pertanyaan seputar SPMB, pendaftaran, dan informasi sekolah dapat langsung disampaikan melalui WhatsApp.</p>
+                <a href="https://wa.me/6281234567890" target="_blank" rel="noopener" class="btn btn-secondary" data-config="whatsapp" style="margin-top: 0.5rem;">
+                  Chat WhatsApp Sekolah
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Peta Lokasi Google Maps Embed -->
+          <div style="background: #ffffff; border-radius: var(--radius-lg); border: 1px solid var(--border-color); overflow: hidden; box-shadow: var(--shadow-sm); padding: 1.5rem;">
+            <h3 style="margin-bottom: 1rem; color: var(--primary);">Lokasi SD Negeri Sumberejo 04</h3>
+            <div style="position: relative; width: 100%; height: 420px; border-radius: var(--radius-md); overflow: hidden; background: #e2e8f0;">
+              <iframe
+                data-config="mapEmbedUrl"
+                src="https://maps.google.com/maps?q=SDN+Sumberejo&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                width="100%"
+                height="100%"
+                style="border:0;"
+                allowfullscreen=""
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -191,27 +519,27 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-col">
-          <h4 data-config="namaSekolah">SD Negeri Sumberejo 03</h4>
+          <h4 data-config="namaSekolah">SD Negeri Sumberejo 04</h4>
           <p>Membentuk pribadi cerdas, berkarakter, dan siap menyongsong masa depan dengan landasan iman dan takwa.</p>
           <p style="font-size: 0.9rem;">NPSN: <strong>20522000</strong> | Akreditasi: <strong><span data-config="akreditasi">A</span></strong></p>
         </div>
         <div class="footer-col">
           <h4>Navigasi</h4>
           <ul class="footer-links">
-            <li><a href="index.html">Beranda</a></li>
-            <li><a href="profil.html">Profil Sekolah</a></li>
-            <li><a href="guru.html">Guru & Tenaga Didik</a></li>
-            <li><a href="program.html">Program Sekolah</a></li>
-            <li><a href="fasilitas.html">Fasilitas</a></li>
+            <li><a href="#beranda">Beranda</a></li>
+            <li><a href="#profil">Profil Sekolah</a></li>
+            <li><a href="#guru">Guru &amp; Tenaga Didik</a></li>
+            <li><a href="#program">Program Sekolah</a></li>
+            <li><a href="#fasilitas">Fasilitas</a></li>
           </ul>
         </div>
         <div class="footer-col">
           <h4>SPMB</h4>
           <ul class="footer-links">
-            <li><a href="spmb.html">Jadwal & Syarat</a></li>
-            <li><a href="spmb.html#alur">Alur Pendaftaran</a></li>
+            <li><a href="#spmb">Jadwal &amp; Syarat</a></li>
+            <li><a href="#spmb">Alur Pendaftaran</a></li>
             <li><a href="daftar.html">Formulir Online</a></li>
-            <li><a href="kontak.html">Bantuan Pendaftaran</a></li>
+            <li><a href="#kontak">Bantuan Pendaftaran</a></li>
           </ul>
         </div>
         <div class="footer-col">

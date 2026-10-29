@@ -49,6 +49,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Offset Scroll Agar Judul Bagian Tidak Tertutup Navbar Sticky */
+section[id], div[id].scroll-target {
+  scroll-margin-top: 85px;
+}
+
 body {
   font-family: var(--font-family);
   background-color: var(--bg-page);
@@ -216,11 +221,32 @@ a:hover { color: var(--primary-hover); }
   font-weight: 600;
   color: var(--text-main);
   border-radius: var(--radius-sm);
+  transition: all 0.2s ease-in-out;
+  position: relative;
 }
 
-.nav-link:hover, .nav-link.active {
+.nav-link:hover {
   background-color: var(--primary-light);
   color: var(--primary);
+}
+
+.nav-link.active {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .nav-link.active::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0.85rem;
+    right: 0.85rem;
+    height: 3px;
+    background-color: var(--secondary);
+    border-radius: 2px;
+  }
 }
 
 .nav-cta {

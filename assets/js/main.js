@@ -259,13 +259,15 @@ function renderPengumumanCards(container, list) {
   container.innerHTML = list
     .map(
       (item) => `
-    <article class="card">
-      <div class="card-body">
-        <div class="card-meta">
-          <span>📅 ${formatDateId(item.tanggal)}</span>
+    <article class="news-card-anaverse">
+      <div class="news-card-thumb">📢</div>
+      <div class="news-card-body">
+        <span class="news-card-tag">Pengumuman</span>
+        <h3 class="news-card-title">${escapeHtml(item.judul)}</h3>
+        <p style="font-size: 0.86rem; color: #64748b; line-height: 1.5; margin-bottom: 1rem;">${escapeHtml(item.isi)}</p>
+        <div class="news-card-date">
+          <span>📅</span> ${formatDateId(item.tanggal)}
         </div>
-        <h3 class="card-title">${escapeHtml(item.judul)}</h3>
-        <p>${escapeHtml(item.isi)}</p>
       </div>
     </article>
   `
@@ -274,30 +276,95 @@ function renderPengumumanCards(container, list) {
   triggerHomyzReveal();
 }
 
+function getDefaultHomeAvatarHtml(nama) {
+  const initial = (nama || "G").charAt(0).toUpperCase();
+  return `<div style="font-size: 3.5rem; font-weight: 800; color: #ffffff;">${initial}</div>`;
+}
+
+function renderHomeGuruCards(container, list) {
+  if (!container || !list || list.length === 0) return;
+  const items = list.slice(0, 4);
+  container.innerHTML = items
+    .map((guru) => {
+      const formattedUrl = formatPhotoUrl(guru.fotoUrl);
+      const driveId = extractDriveId(guru.fotoUrl);
+      const photoHtml = formattedUrl
+        ? `<img src="${escapeHtml(formattedUrl)}" 
+                alt="${escapeHtml(guru.nama)}" 
+                loading="lazy" 
+                referrerpolicy="no-referrer"
+                onerror="this.onerror=null; ${driveId ? `this.src='https://lh3.googleusercontent.com/d/${driveId}'; this.parentElement.style.background='linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)'; this.onerror=function(){this.parentElement.innerHTML=getDefaultHomeAvatarHtml('${escapeHtml(guru.nama)}');};` : `this.parentElement.style.background='linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)'; this.parentElement.innerHTML=getDefaultHomeAvatarHtml('${escapeHtml(guru.nama)}');`}">`
+        : getDefaultHomeAvatarHtml(guru.nama);
+
+      const bgStyle = !formattedUrl ? 'style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #ffffff;"' : '';
+
+      return `
+        <div class="teacher-card-anaverse">
+          <div class="teacher-card-photo-box" ${bgStyle}>
+            ${photoHtml}
+          </div>
+          <div class="teacher-card-info">
+            <h4 class="teacher-card-name">${escapeHtml(guru.nama)}</h4>
+            <span class="teacher-card-role">${escapeHtml(guru.jabatan || "Tenaga Pendidik")}</span>
+            <span class="teacher-rating-badge">⭐ 4.9</span>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+  triggerHomyzReveal();
+}
+
 async function initHomePage() {
   const container = document.getElementById("pengumumanContainer");
-  if (!container) return;
+  const guruContainer = document.getElementById("homeGuruContainer");
 
   // 1. Tampilkan instan (0 ms) dari cache lokal jika ada
   try {
-    const cached = localStorage.getItem("sdn_pengumuman_list");
-    if (cached) {
-      const parsed = JSON.parse(cached);
+    const cachedPengumuman = localStorage.getItem("sdn_pengumuman_list");
+    if (cachedPengumuman && container) {
+      const parsed = JSON.parse(cachedPengumuman);
       if (Array.isArray(parsed) && parsed.length > 0) {
         renderPengumumanCards(container, parsed);
       }
     }
   } catch (e) {}
 
-  // 2. Sinkronkan data segar dari server di latar belakang
   try {
-    const list = await SchoolAPI.get("getPengumuman", { limit: 3 });
-    if (list && Array.isArray(list)) {
-      localStorage.setItem("sdn_pengumuman_list", JSON.stringify(list));
-      renderPengumumanCards(container, list);
+    const cachedGuru = localStorage.getItem("sdn_guru_list");
+    if (cachedGuru && guruContainer) {
+      const parsed = JSON.parse(cachedGuru);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        renderHomeGuruCards(guruContainer, parsed);
+      }
     }
-  } catch (e) {
-    console.warn("Gagal menyinkronkan pengumuman terbaru.");
+  } catch (e) {}
+
+  // 2. Sinkronkan data segar dari server di latar belakang
+  if (container) {
+    SchoolAPI.get("getPengumuman", { limit: 4 })
+      .then((list) => {
+        if (list && Array.isArray(list)) {
+          localStorage.setItem("sdn_pengumuman_list", JSON.stringify(list));
+          renderPengumumanCards(container, list);
+        }
+      })
+      .catch((e) => {
+        console.warn("Gagal menyinkronkan pengumuman terbaru.");
+      });
+  }
+
+  if (guruContainer) {
+    SchoolAPI.get("getGuru")
+      .then((list) => {
+        if (list && Array.isArray(list)) {
+          localStorage.setItem("sdn_guru_list", JSON.stringify(list));
+          renderHomeGuruCards(guruContainer, list);
+        }
+      })
+      .catch((e) => {
+        console.warn("Gagal menyinkronkan guru beranda.");
+      });
   }
 }
 

@@ -421,7 +421,7 @@ function adminUploadMedia(berkas, alt, session) {
   const file = folder.createFile(blob);
   file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
-  const directUrl = `https://lh3.googleusercontent.com/d/${file.getId()}`;
+  const directUrl = `https://drive.google.com/thumbnail?id=${file.getId()}&sz=w1000`;
 
   const ss = getSpreadsheet();
   let mSheet = ss.getSheetByName("Media");

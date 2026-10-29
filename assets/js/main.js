@@ -292,16 +292,26 @@ async function initGuruPage() {
     if (list && list.length > 0) {
       container.innerHTML = list
         .map((guru) => {
-          const photoHtml = guru.fotoUrl
-            ? `<img src="${escapeHtml(guru.fotoUrl)}" alt="${escapeHtml(guru.nama)}" class="card-img" onerror="this.outerHTML=getDefaultAvatarHtml('${escapeHtml(guru.nama)}')">`
+          const formattedUrl = formatPhotoUrl(guru.fotoUrl);
+          const driveId = extractDriveId(guru.fotoUrl);
+
+          const photoHtml = formattedUrl
+            ? `<div class="guru-photo-wrap">
+                 <img src="${escapeHtml(formattedUrl)}" 
+                      alt="${escapeHtml(guru.nama)}" 
+                      class="guru-photo" 
+                      loading="lazy" 
+                      referrerpolicy="no-referrer"
+                      onerror="this.onerror=null; ${driveId ? `this.src='https://lh3.googleusercontent.com/d/${driveId}'; this.onerror=function(){this.parentElement.outerHTML=getDefaultAvatarHtml('${escapeHtml(guru.nama)}');};` : `this.parentElement.outerHTML=getDefaultAvatarHtml('${escapeHtml(guru.nama)}');`}">
+               </div>`
             : getDefaultAvatarHtml(guru.nama);
 
           return `
-          <div class="card">
+          <div class="card guru-card">
             ${photoHtml}
-            <div class="card-body" style="text-align: center;">
-              <h3 class="card-title" style="font-size: 1.15rem; margin-bottom: 0.35rem;">${escapeHtml(guru.nama)}</h3>
-              <p style="color: var(--primary); font-weight: 600; font-size: 0.9rem; margin-bottom: 0;">${escapeHtml(guru.jabatan)}</p>
+            <div class="guru-card-body">
+              <h3 class="guru-name">${escapeHtml(guru.nama)}</h3>
+              <span class="guru-role-badge">${escapeHtml(guru.jabatan)}</span>
             </div>
           </div>
         `;
@@ -718,10 +728,33 @@ function escapeHtml(str) {
 function getDefaultAvatarHtml(nama) {
   const initial = (nama || "G").charAt(0).toUpperCase();
   return `
-    <div class="card-img" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #ffffff; font-size: 2.5rem; font-weight: 700;">
-      ${initial}
+    <div class="guru-photo-wrap" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffffff;">
+      <div style="font-size: 4.5rem; font-weight: 800; line-height: 1; text-shadow: 0 4px 12px rgba(0,0,0,0.15);">${initial}</div>
+      <div style="font-size: 0.82rem; opacity: 0.9; margin-top: 0.5rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;">Foto Pendidik</div>
     </div>
   `;
+}
+
+function formatPhotoUrl(url) {
+  if (!url) return "";
+  const clean = String(url).trim();
+  const fileId = extractDriveId(clean);
+  if (fileId) {
+    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+  }
+  return clean;
+}
+
+function extractDriveId(url) {
+  if (!url) return null;
+  const str = String(url).trim();
+  const m1 = str.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (m1) return m1[1];
+  const m2 = str.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (m2) return m2[1];
+  const m3 = str.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m3) return m3[1];
+  return null;
 }
 
 function getDefaultFacilityImgHtml() {

@@ -309,7 +309,7 @@ function initGlobalData() {
 function initPageSpecific() {
   const path = window.location.pathname.split("/").pop() || "index.html";
 
-  if (path === "index.html" || path === "") {
+  if (path === "index.html" || path === "" || path === "pengumuman.html") {
     initHomePage();
   } else if (path === "guru.html") {
     initGuruPage();
@@ -327,49 +327,286 @@ function initPageSpecific() {
 }
 
 // ------------------------------------------
-// Beranda (index.html)
+// Beranda (index.html) - Desain Pengumuman Gambar 1
 // ------------------------------------------
-function renderPengumumanCards(container, list) {
-  if (!list || list.length === 0) {
-    container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">Belum ada pengumuman terbaru.</div>`;
-    return;
+const DEFAULT_FEATURED_PENGUMUMAN = [
+  {
+    id: "ann-sumpah-pemuda-2026",
+    judul: "PERINGATAN HARI SUMPAH PEMUDA",
+    tanggal: "2026-10-28",
+    kategori: "Kegiatan Sekolah",
+    kategoriClass: "blue",
+    kategoriIcon: "📢",
+    fotoUrl: "assets/img/pengumuman-sumpah-pemuda.svg",
+    isi: "Diberitahukan kepada seluruh siswa-siswi dan orang tua/wali murid SDN Sumberejo 04, dalam rangka memperingati Hari Sumpah Pemuda pada tanggal 28 Oktober 2026, sekolah akan menyelenggarakan kegiatan dengan rincian sebagai berikut:\n\nHari, tanggal: Rabu, 28 Oktober 2026\nWaktu: Pukul 07.00 WIB – Selesai\nKegiatan: Upacara Bendera Peringatan Hari Sumpah Pemuda & Kegiatan Literasi/Kreativitas Siswa\nPakaian/Seragam: Pakaian Adat / Batik Sekolah / Seragam Pramuka\n\nDiharapkan seluruh siswa hadir tepat waktu dan mengikuti seluruh rangkaian kegiatan dengan tertib dan penuh semangat. Demikian pengumuman ini disampaikan. Atas perhatian dan kerja sama Bapak/Ibu Wali Murid, kami ucapkan terima kasih."
+  },
+  {
+    id: "ann-pts-2026",
+    judul: "Jadwal Penilaian Tengah Semester (PTS)",
+    tanggal: "2026-10-25",
+    kategori: "Akademik",
+    kategoriClass: "green",
+    kategoriIcon: "📖",
+    fotoUrl: "assets/img/pengumuman-pts.svg",
+    isi: "Diberitahukan kepada seluruh siswa-siswi, bahwa pelaksanaan Penilaian Tengah Semester (PTS) akan dilaksanakan pada tanggal 2 November – 7 November 2026. Mohon semua siswa mempersiapkan diri dengan baik dan belajar secara teratur. Jadwal mata pelajaran harian dapat dilihat melalui lembar informasi yang dibagikan wali kelas masing-masing."
+  },
+  {
+    id: "ann-rapat-ortu-2026",
+    judul: "Rapat Orang Tua Wali Murid",
+    tanggal: "2026-10-22",
+    kategori: "Orang Tua",
+    kategoriClass: "purple",
+    kategoriIcon: "👥",
+    fotoUrl: "assets/img/pengumuman-rapat-ortu.svg",
+    isi: "Diberitahukan kepada seluruh orang tua/wali murid kelas 1–6 bahwa akan dilaksanakan Rapat Orang Tua/Wali Murid pada tanggal 30 Oktober 2026 pukul 08.00 WIB di ruang kelas masing-masing. Kehadiran Bapak/Ibu sangat kami harapkan guna membahas perkembangan kurikulum, pembinaan karakter, serta persiapan agenda semester berjalan."
   }
-  container.innerHTML = list
+];
+
+let currentAllPengumumanList = [...DEFAULT_FEATURED_PENGUMUMAN];
+
+function normalizePengumumanList(rawList) {
+  if (!rawList || !Array.isArray(rawList) || rawList.length === 0) {
+    return DEFAULT_FEATURED_PENGUMUMAN;
+  }
+
+  const processed = rawList.map((item, idx) => {
+    let kategori = item.kategori || "";
+    let kategoriClass = "blue";
+    let kategoriIcon = "📢";
+
+    const titleLower = (item.judul || "").toLowerCase();
+
+    if (kategori) {
+      const catLower = kategori.toLowerCase();
+      if (catLower.includes("akademik") || catLower.includes("belajar") || catLower.includes("ujian")) {
+        kategoriClass = "green";
+        kategoriIcon = "📖";
+      } else if (catLower.includes("orang tua") || catLower.includes("wali")) {
+        kategoriClass = "purple";
+        kategoriIcon = "👥";
+      } else if (catLower.includes("kegiatan") || catLower.includes("ekskul") || catLower.includes("lomba")) {
+        kategoriClass = "blue";
+        kategoriIcon = "📢";
+      } else {
+        kategoriClass = "amber";
+        kategoriIcon = "📢";
+      }
+    } else {
+      if (titleLower.includes("pts") || titleLower.includes("semester") || titleLower.includes("ujian") || titleLower.includes("akademik") || titleLower.includes("rapor")) {
+        kategori = "Akademik";
+        kategoriClass = "green";
+        kategoriIcon = "📖";
+      } else if (titleLower.includes("orang tua") || titleLower.includes("wali") || titleLower.includes("rapat") || titleLower.includes("komite")) {
+        kategori = "Orang Tua";
+        kategoriClass = "purple";
+        kategoriIcon = "👥";
+      } else if (titleLower.includes("sumpah pemuda") || titleLower.includes("upacara") || titleLower.includes("kegiatan") || titleLower.includes("pramuka") || titleLower.includes("lomba") || titleLower.includes("peringatan")) {
+        kategori = "Kegiatan Sekolah";
+        kategoriClass = "blue";
+        kategoriIcon = "📢";
+      } else {
+        kategori = "Informasi Sekolah";
+        kategoriClass = "amber";
+        kategoriIcon = "📢";
+      }
+    }
+
+    let bannerUrl = item.fotoUrl || item.bannerUrl || "";
+    if (!bannerUrl) {
+      if (kategoriClass === "green") {
+        bannerUrl = "assets/img/pengumuman-pts.svg";
+      } else if (kategoriClass === "purple") {
+        bannerUrl = "assets/img/pengumuman-rapat-ortu.svg";
+      } else {
+        bannerUrl = "assets/img/pengumuman-sumpah-pemuda.svg";
+      }
+    } else {
+      bannerUrl = formatPhotoUrl(bannerUrl);
+    }
+
+    return {
+      id: item.id || `ann-${idx}-${Date.now()}`,
+      judul: item.judul || "Pengumuman Sekolah",
+      tanggal: item.tanggal || new Date().toISOString().split("T")[0],
+      kategori,
+      kategoriClass,
+      kategoriIcon,
+      bannerUrl,
+      isi: item.isi || ""
+    };
+  });
+
+  // Jika item kurang dari 3, gabungkan dengan default featured agar grid 3 kolom tetap rapi dan identik Gambar 1
+  if (processed.length < 3) {
+    const existingTitles = processed.map((x) => x.judul.toLowerCase());
+    for (const def of DEFAULT_FEATURED_PENGUMUMAN) {
+      if (!existingTitles.some((t) => t.includes(def.judul.toLowerCase()) || def.judul.toLowerCase().includes(t))) {
+        processed.push(def);
+        if (processed.length >= 3) break;
+      }
+    }
+  }
+
+  return processed;
+}
+
+function renderPengumumanCards(container, list) {
+  const items = normalizePengumumanList(list);
+  currentAllPengumumanList = items;
+
+  // Tampilkan 3 pengumuman pertama persis Gambar 1
+  const displayItems = items.slice(0, 3);
+
+  container.innerHTML = displayItems
     .map(
       (item) => `
-    <article class="card">
-      <div class="card-body">
-        <div class="card-meta">
-          <span>📅 ${formatDateId(item.tanggal)}</span>
+    <article class="pengumuman-card homyz-reveal">
+      <div class="pengumuman-thumb-wrap">
+        <img src="${escapeHtml(item.bannerUrl)}" 
+             alt="${escapeHtml(item.judul)}" 
+             class="pengumuman-thumb" 
+             loading="lazy" 
+             onerror="this.onerror=null; this.src='assets/img/pengumuman-sumpah-pemuda.svg';">
+      </div>
+      <div class="pengumuman-card-content">
+        <div class="pengumuman-meta-row">
+          <span class="pengumuman-date">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            ${formatDateId(item.tanggal)}
+          </span>
+          <span class="pengumuman-category-badge badge-cat-${escapeHtml(item.kategoriClass || 'blue')}">
+            <span>${item.kategoriIcon || '📢'}</span> ${escapeHtml(item.kategori || 'Informasi')}
+          </span>
         </div>
-        <h3 class="card-title">${escapeHtml(item.judul)}</h3>
-        <p>${escapeHtml(item.isi)}</p>
+        <h3 class="pengumuman-title">${escapeHtml(item.judul)}</h3>
+        <p class="pengumuman-excerpt">${escapeHtml(item.isi)}</p>
+        <div class="pengumuman-card-footer">
+          <button type="button" class="btn-read-more" onclick="openPengumumanModal('${item.id}')">
+            Baca Selengkapnya <span style="font-size: 1.15rem; font-weight: 700; line-height: 1;">›</span>
+          </button>
+        </div>
       </div>
     </article>
   `
     )
     .join("");
+
   triggerHomyzReveal();
 }
+
+function openPengumumanModal(id) {
+  const item = currentAllPengumumanList.find((x) => String(x.id) === String(id));
+  if (!item) return;
+
+  const modal = document.getElementById("modalPengumumanDetail");
+  const content = document.getElementById("modalPengumumanContent");
+  if (!modal || !content) return;
+
+  const paragraphs = escapeHtml(item.isi)
+    .split("\n")
+    .filter((p) => p.trim() !== "")
+    .map((p) => `<p style="margin-bottom: 0.85rem; line-height: 1.7; color: #334155;">${p}</p>`)
+    .join("");
+
+  content.innerHTML = `
+    <div style="border-radius: 14px; overflow: hidden; margin-bottom: 1.25rem; max-height: 280px; background: #0f172a;">
+      <img src="${escapeHtml(item.bannerUrl)}" alt="${escapeHtml(item.judul)}" style="width: 100%; height: 100%; object-fit: cover; display: block;" onerror="this.onerror=null; this.src='assets/img/pengumuman-sumpah-pemuda.svg';">
+    </div>
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+      <span class="pengumuman-date" style="font-size: 0.9rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        ${formatDateId(item.tanggal)}
+      </span>
+      <span class="pengumuman-category-badge badge-cat-${escapeHtml(item.kategoriClass || 'blue')}">
+        <span>${item.kategoriIcon || '📢'}</span> ${escapeHtml(item.kategori || 'Informasi')}
+      </span>
+    </div>
+    <h2 style="font-size: 1.45rem; font-weight: 800; color: #0f172a; margin-bottom: 1.25rem; line-height: 1.35;">${escapeHtml(item.judul)}</h2>
+    <div style="font-size: 0.98rem; line-height: 1.75; color: #334155; margin-bottom: 1.75rem;">
+      ${paragraphs}
+    </div>
+    <div style="display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
+      <a href="https://wa.me/?text=${encodeURIComponent(item.judul + '\n\n' + item.isi)}" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="color: #16a34a; border-color: #16a34a;">
+        💬 Bagikan ke WhatsApp
+      </a>
+      <button type="button" class="btn btn-primary btn-sm" onclick="closePengumumanModal()">
+        Tutup
+      </button>
+    </div>
+  `;
+
+  modal.classList.add("active");
+}
+
+function closePengumumanModal() {
+  const modal = document.getElementById("modalPengumumanDetail");
+  if (modal) modal.classList.remove("active");
+}
+
+function openAllPengumumanModal() {
+  const modal = document.getElementById("modalAllPengumuman");
+  const listEl = document.getElementById("modalAllPengumumanList");
+  if (!modal || !listEl) return;
+
+  listEl.innerHTML = currentAllPengumumanList
+    .map(
+      (item) => `
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.15rem; display: flex; gap: 1rem; align-items: center; transition: all 0.2s ease;">
+      <div style="width: 80px; height: 60px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: #0f172a;">
+        <img src="${escapeHtml(item.bannerUrl)}" alt="${escapeHtml(item.judul)}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.src='assets/img/pengumuman-sumpah-pemuda.svg';">
+      </div>
+      <div style="flex: 1; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+          <span style="font-size: 0.78rem; color: #64748b;">📅 ${formatDateId(item.tanggal)}</span>
+          <span class="pengumuman-category-badge badge-cat-${escapeHtml(item.kategoriClass || 'blue')}" style="padding: 0.15rem 0.5rem; font-size: 0.72rem;">${escapeHtml(item.kategori)}</span>
+        </div>
+        <h4 style="margin: 0 0 0.25rem 0; font-size: 1rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(item.judul)}</h4>
+        <p style="margin: 0; font-size: 0.85rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(item.isi)}</p>
+      </div>
+      <button type="button" class="btn btn-primary btn-sm" style="flex-shrink: 0; padding: 0.4rem 0.85rem; font-size: 0.82rem;" onclick="closeAllPengumumanModal(); openPengumumanModal('${item.id}')">
+        Baca
+      </button>
+    </div>
+  `
+    )
+    .join("");
+
+  modal.classList.add("active");
+}
+
+function closeAllPengumumanModal() {
+  const modal = document.getElementById("modalAllPengumuman");
+  if (modal) modal.classList.remove("active");
+}
+
+window.openPengumumanModal = openPengumumanModal;
+window.closePengumumanModal = closePengumumanModal;
+window.openAllPengumumanModal = openAllPengumumanModal;
+window.closeAllPengumumanModal = closeAllPengumumanModal;
 
 async function initHomePage() {
   const container = document.getElementById("pengumumanContainer");
   if (container) {
-    // 1. Tampilkan instan (0 ms) dari cache lokal jika ada
+    let rendered = false;
     try {
       const cached = localStorage.getItem("sdn_pengumuman_list");
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
           renderPengumumanCards(container, parsed);
+          rendered = true;
         }
       }
     } catch (e) {}
 
+    if (!rendered) {
+      renderPengumumanCards(container, DEFAULT_FEATURED_PENGUMUMAN);
+    }
+
     // 2. Sinkronkan data segar dari server di latar belakang
-    SchoolAPI.get("getPengumuman", { limit: 3 })
+    SchoolAPI.get("getPengumuman", { limit: 6 })
       .then((list) => {
-        if (list && Array.isArray(list)) {
+        if (list && Array.isArray(list) && list.length > 0) {
           localStorage.setItem("sdn_pengumuman_list", JSON.stringify(list));
           renderPengumumanCards(container, list);
         }

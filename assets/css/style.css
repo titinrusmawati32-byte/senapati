@@ -755,6 +755,341 @@ a:hover { color: var(--primary-hover); }
   border-top: 1px solid var(--border-color);
 }
 
+/* ==========================================================================
+   DESAIN SEKSI INFORMASI TERBARU (PENGUMUMAN) - PERSIS GAMBAR 1
+   ========================================================================== */
+.pengumuman-section {
+  background: linear-gradient(180deg, #f8fafc 0%, #f0f7ff 50%, #f8fafc 100%);
+  padding: 4.5rem 0 5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background Soft Clouds Accents */
+.pengumuman-section::before,
+.pengumuman-section::after {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(224, 242, 254, 0.6) 0%, rgba(240, 249, 255, 0) 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pengumuman-section::before {
+  top: 10%;
+  left: -80px;
+}
+
+.pengumuman-section::after {
+  bottom: 5%;
+  right: -80px;
+}
+
+.pengumuman-header-wrap {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.badge-tag-pengumuman {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  border-radius: 9999px;
+  padding: 0.45rem 1.35rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  margin-bottom: 1.15rem;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.15);
+}
+
+.pengumuman-main-title {
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 0.85rem;
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.pengumuman-main-title .highlight-blue {
+  color: #2563eb;
+}
+
+.spark-left, .spark-right {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.5rem;
+}
+
+.pengumuman-subtitle {
+  color: #475569;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 680px;
+}
+
+.pengumuman-accent-line {
+  width: 48px;
+  height: 4px;
+  background: #2563eb;
+  border-radius: 9999px;
+  margin: 1.25rem auto 0;
+}
+
+/* Grid 3 Kolom Responsif Sesuai Gambar 1 */
+.pengumuman-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 768px) {
+  .pengumuman-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .pengumuman-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Kartu Pengumuman Gaya Gambar 1 */
+.pengumuman-card {
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #eef2f6;
+  padding: 1.25rem;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.pengumuman-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 22px 35px -8px rgba(10, 37, 64, 0.12);
+  border-color: rgba(37, 99, 235, 0.3);
+}
+
+.pengumuman-thumb-wrap {
+  width: 100%;
+  height: 195px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0f172a;
+  position: relative;
+  margin-bottom: 1.15rem;
+}
+
+.pengumuman-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pengumuman-card:hover .pengumuman-thumb {
+  transform: scale(1.05);
+}
+
+.pengumuman-card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.pengumuman-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pengumuman-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.84rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.pengumuman-category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.badge-cat-blue {
+  background: #e0f2fe;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+}
+
+.badge-cat-green {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.badge-cat-purple {
+  background: #f3e8ff;
+  color: #9333ea;
+  border: 1px solid #e9d5ff;
+}
+
+.badge-cat-amber {
+  background: #fef3c7;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.pengumuman-title {
+  font-size: 1.18rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.65rem 0;
+  line-height: 1.35;
+}
+
+.pengumuman-excerpt {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 1.35rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pengumuman-card-footer {
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.btn-read-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #1d72e8;
+  color: #ffffff !important;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 0.55rem 1.35rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 8px rgba(29, 114, 232, 0.25);
+}
+
+.btn-read-more:hover {
+  background: #1557b0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(29, 114, 232, 0.35);
+}
+
+.pengumuman-bottom-action {
+  text-align: center;
+  margin-top: 2.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.btn-all-pengumuman {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1.5px solid #bfdbfe;
+  padding: 0.65rem 1.65rem;
+  border-radius: 9999px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+
+.btn-all-pengumuman:hover {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(29, 78, 216, 0.12);
+}
+
+/* Modal Luas untuk Detail Pengumuman */
+.modal-content-lg {
+  max-width: 680px;
+  text-align: left;
+  padding: 2.25rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: #f1f5f9;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
 /* Alur SPMB / Langkah */
 .steps-grid {
   display: grid;

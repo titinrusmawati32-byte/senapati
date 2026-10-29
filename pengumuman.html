@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengumuman & Warta Sekolah - SD Negeri Sumberejo 04</title>
+  <meta name="description" content="Informasi penting, agenda akademik, dan pengumuman resmi terbaru SD Negeri Sumberejo 04.">
+  <link rel="icon" type="image/svg+xml" href="assets/img/logo.svg">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <!-- Top Info Bar -->
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div class="top-info">
+        <span>📍 <span data-config="alamat">Jl Lapangan No 88 Krajan Kidul Sumberejo Kecamatan Ambulu Jember Jawatimur</span></span>
+        <span>🕒 <span data-config="jamLayanan">Senin - Jumat, 07:00 - 13:00 WIB</span></span>
+      </div>
+      <div class="top-info">
+        <span>📞 <a href="tel:0338123456" data-config="telepon" style="color: #fde047;">(0338) 123456</a></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container">
+      <nav class="navbar">
+        <a href="index.html" class="brand">
+          <img src="assets/img/logo.svg" alt="Logo SD Negeri Sumberejo 04" class="brand-logo">
+          <div class="brand-text">
+            <span class="brand-title" data-config="namaSekolah">SDN SUMBEREJO 04</span>
+            <span class="brand-sub">Unggul dalam Prestasi, Santun Berbudi</span>
+          </div>
+        </a>
+
+        <button class="nav-toggle" id="navToggle" aria-label="Buka navigasi menu">
+          <span></span><span></span><span></span>
+        </button>
+
+        <ul class="nav-menu" id="navMenu">
+          <li><a href="index.html#beranda" class="nav-link">Beranda</a></li>
+          <li><a href="index.html#profil" class="nav-link">Profil</a></li>
+          <li><a href="index.html#guru" class="nav-link">Guru</a></li>
+          <li><a href="index.html#program" class="nav-link">Program</a></li>
+          <li><a href="index.html#fasilitas" class="nav-link">Fasilitas</a></li>
+          <li><a href="index.html#spmb" class="nav-link">SPMB</a></li>
+          <li><a href="index.html#kontak" class="nav-link">Kontak</a></li>
+          <li><a href="daftar.html" class="nav-link nav-cta">Daftar Sekarang</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Seksi Pengumuman Modern Sesuai Gambar 1 -->
+    <section class="section pengumuman-section" style="padding-top: 3.5rem;">
+      <div class="container">
+        <div class="pengumuman-header-wrap">
+          <div class="badge-tag-pengumuman">
+            <span>📢</span> Pengumuman
+          </div>
+          <h1 class="pengumuman-main-title">
+            <span class="spark-left">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M4 14L9 5M11 19L17 11" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
+              </svg>
+            </span>
+            Informasi <span class="highlight-blue">Terbaru</span> dari Sekolah
+            <span class="spark-right">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M20 14L15 5M13 19L7 11" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round"/>
+              </svg>
+            </span>
+          </h1>
+          <p class="pengumuman-subtitle">
+            Ikuti perkembangan penting seputar kegiatan, agenda, dan informasi sekolah agar tidak ketinggalan informasi terbaru.
+          </p>
+          <div class="pengumuman-accent-line"></div>
+        </div>
+
+        <div class="pengumuman-grid" id="pengumumanContainer">
+          <!-- Diisi otomatis oleh JavaScript -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal Detail Pengumuman -->
+  <div class="modal-overlay" id="modalPengumumanDetail">
+    <div class="modal-content modal-content-lg">
+      <button type="button" class="modal-close-btn" onclick="closePengumumanModal()" aria-label="Tutup">&times;</button>
+      <div id="modalPengumumanContent"></div>
+    </div>
+  </div>
+
+  <!-- Floating WA Button -->
+  <a href="https://wa.me/6281234567890?text=Halo%20Admin%20SDN%20Sumberejo%2004,%20saya%20ingin%20bertanya%20informasi%20sekolah." class="float-wa" id="floatingWa" target="_blank" rel="noopener" aria-label="Hubungi kami di WhatsApp">
+    <svg viewBox="0 0 24 24">
+      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.299.144.35.49 1.199.534 1.286.044.087.073.188.014.303-.058.116-.087.188-.173.289l-.26.302c-.087.087-.179.182-.077.357.101.174.453.748.971 1.21.666.593 1.229.777 1.402.864.174.087.275.073.376-.044.101-.116.433-.506.549-.68.116-.174.232-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.073.045.419-.099.824z"/>
+      <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.662 1.435 5.176L2 22l4.981-1.396A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.062c-1.635 0-3.153-.483-4.428-1.314l-.317-.208-2.962.83.844-2.887-.229-.333A8.026 8.026 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8.062-8 8.062z"/>
+    </svg>
+  </a>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4 data-config="namaSekolah">SD Negeri Sumberejo 04</h4>
+          <p>Membentuk pribadi cerdas, berkarakter, dan siap menyongsong masa depan dengan landasan iman dan takwa.</p>
+          <p style="font-size: 0.9rem;">NPSN: <strong>20522000</strong> | Akreditasi: <strong><span data-config="akreditasi">A</span></strong></p>
+        </div>
+        <div class="footer-col">
+          <h4>Navigasi</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#beranda">Beranda</a></li>
+            <li><a href="index.html#profil">Profil Sekolah</a></li>
+            <li><a href="index.html#guru">Guru &amp; Tenaga Didik</a></li>
+            <li><a href="index.html#program">Program Sekolah</a></li>
+            <li><a href="index.html#fasilitas">Fasilitas</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>SPMB</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#spmb">Jadwal &amp; Syarat</a></li>
+            <li><a href="index.html#spmb">Alur Pendaftaran</a></li>
+            <li><a href="daftar.html">Formulir Online</a></li>
+            <li><a href="index.html#kontak">Bantuan Pendaftaran</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Hubungi Kami</h4>
+          <p style="margin-bottom: 0.5rem;">📍 <span data-config="alamat">Jl Lapangan No 88 Krajan Kidul Sumberejo Kecamatan Ambulu Jember Jawatimur</span></p>
+          <p style="margin-bottom: 0.5rem;">📞 <span data-config="telepon">(0338) 123456</span></p>
+          <p style="margin-bottom: 0.5rem;">✉️ <span data-config="email">sdn.sumberejo04@gmail.com</span></p>
+          <p style="margin-bottom: 0.5rem;">🕒 <span data-config="jamLayanan">07:00 - 13:00 WIB</span></p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2027 SD Negeri Sumberejo 04. Hak cipta dilindungi undang-undang.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
